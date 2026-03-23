@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+.app {
+  @apply min-h-screen flex items-center justify-center bg-[#7F9098];  
+}
+
+.img-logo {
+  @apply absolute top-[88px] w-[750px] h-[250px] object-contain opacity-60;
+}
+
+/* 이미지 + 텍스트를 세로로 배치 */
+.icon-box {
+  @apply absolute flex flex-col items-center;
+}
+
+/* 기존 위치값을 박스에 적용 */
+.secure-pos {
+  @apply top-[550px] left-[490px] drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)];
+}
+.document-pos {
+  @apply top-[550px] right-[490px] drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)];
+}
+
+.img-secure {
+  @apply w-[110px] h-[110px] object-contain;
+}
+
+.img-document {
+  @apply w-[110px] h-[110px] object-contain;
+}
+
+.icon-text {
+  @apply mt-2 text-white text-[32px] font-normal;
+}
