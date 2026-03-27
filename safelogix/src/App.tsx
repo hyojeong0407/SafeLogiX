@@ -1,12 +1,13 @@
 import './App.css'
-import safelogixLogo from './assets/SafeLogiXlogo.png'
-import secure from './assets/Secure.png'
-import document from './assets/Document.png'
+import Cctv from './component/Cctv'
+// import safelogixLogo from './assets/SafeLogiXlogo.png'
+// import secure from './assets/Secure.png'
+// import document from './assets/Document.png'
 
 function App() {
   return (
     <div className="app">
-      <img 
+      {/* <img 
         src={safelogixLogo} 
         alt="SafeLogiX Logo" 
         className="img-logo" 
@@ -19,7 +20,9 @@ function App() {
       <div className="icon-box document-pos">
         <img src={document} alt="Document" className="img-document" />
         <p className="icon-text">문서</p>
-      </div>
+      </div> */}
+
+      <Cctv />
 
     </div>
   )

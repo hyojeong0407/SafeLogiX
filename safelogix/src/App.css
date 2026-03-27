@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
+:root {
+  --screen-bg: #7F9098;
+}
+
+/* 공통 배경: 모든 화면에서 동일하게 사용 */
 .app {
-  @apply min-h-screen flex items-center justify-center bg-[#7F9098];  
+  @apply min-h-screen flex items-center justify-center;
+  background-color: var(--screen-bg);
 }
 
 .img-logo {
