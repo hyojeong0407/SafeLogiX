@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+.cctv-container {
+    @apply w-[1850px] max-w-[95vw] h-[900px] bg-slate-100 rounded-xl overflow-hidden shadow-xl grid;
+    grid-template-columns: 270px 1fr 560px;
+}
+
+.cctv-sidebar {
+    @apply bg-[#07122d] text-white p-6;
+}
+
+.cctv-logo {
+    @apply text-3xl font-bold mb-8;
+}
+
+.cctv-menu {
+    @apply flex flex-col gap-3;
+}
+
+.cctv-menu-item-cctv {
+    @apply h-11 rounded-md text-left px-4 bg-white/5;
+}
+
+.cctv-menu-item-cctv:hover {
+    @apply bg-[#3a1b2c];
+}
+
+.cctv-menu-item-cctv.active {
+    @apply bg-[#3a1b2c];
+}
+
+.cctv-main {
+    @apply bg-white border-r border-slate-200;
+}
+
+.cctv-main-header {
+    @apply bg-white h-14 flex items-center justify-between pt-6 pl-6 pr-6 mb-6;
+}
+
+
+.cctv-main-header h2 {
+    @apply text-[28px] font-bold text-slate-900 leading-tight;
+}
+
+.cctv-main-actions {
+    @apply flex gap-2;
+}
+
+.btn-filter {
+    @apply h-10 px-4 rounded-md border border-slate-300 bg-white text-slate-700 text-sm
+    hover:bg-slate-50 transition-colors;
+}
+
+.btn-download {
+    @apply h-10 px-4 rounded-md bg-red-600 text-white text-sm font-medium
+    hover:bg-red-700 transition-colors;
+}
+
+.cctv-table-area {
+    @apply h-full border-slate-200 bg-slate-50 p-4;
+}
+
+.table-head,
+.table-row {
+    @apply grid items-center px-3;
+    grid-template-columns: 50px 110px 1fr 1fr 90px;
+}
+
+.table-head {
+    @apply h-11 bg-slate-100 text-slate-600 text-[17px] font-semibold;
+}
+
+.cctv-detail {
+    @apply bg-white;
+}
+
+.cctv-detail-header {
+    @apply h-11 flex items-center justify-between pt-5 pl-5 pr-5 mb-5;
+}
+
+.cctv-detail-header h3 {
+    @apply text-[24px] font-semibold text-slate-900;
+}
+
+.close-btn {
+    @apply w-8 h-8 rounded-md text-slate-500 hover:bg-slate-200;
+}
+
+.cctv-preview {
+    @apply h-80 bg-[#0b1738] text-white/70 flex items-center justify-center;
+}
+
+.cctv-info {
+    @apply h-30 bg-slate-50 text-black/60 rounded-lg m-5 p-4;
+}
+
+.state-box {
+    @apply mb-3;
+}
+
+.label {
+    @apply text-[20px] font-semibold text-slate-700 mb-2 pl-5;
+}
+
+.state-actions {
+    @apply grid grid-cols-3 gap-2 m-5;
+}
+
+.state-btn {
+    @apply h-12 rounded-md border border-slate-300 bg-white text-[17px] hover:bg-slate-50;
+}
+
+.state-btn.active {
+    @apply text-red-700;
+}
+
+.state-btn.active:hover {
+    @apply border-red-500 bg-red-100;
+}
+
+.memo-box {
+    @apply mb-3;
+}
+
+.memo-box textarea {
+    @apply w-130 rounded-md border border-slate-300 p-3 ml-5 text-sm bg-white;
+}
+
+.update-btn {
+    @apply mt-5 ml-5 w-130 h-12 rounded-md bg-[#17243f] text-white font-semibold hover:bg-[#243553];
+}
