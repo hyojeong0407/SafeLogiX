@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+.logistics-container {
+    @apply w-[1850px] max-w-[95vw] h-[900px] bg-slate-100 rounded-xl overflow-hidden shadow-xl grid;
+    grid-template-columns: 270px 1fr 560px;
+}
+
+.logistics-sidebar {
+    @apply bg-[#07122d] text-white p-6;
+}
+
+.logistics-logo {
+    @apply text-3xl font-bold mb-8;
+}
+
+.logistics-menu {
+    @apply flex flex-col gap-3;
+}
+
+.logistics-menu-item-logi,
+.logistics-menu-item-cctv {
+    @apply h-11 rounded-md text-left px-4 text-white transition-colors duration-150;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.logistics-menu-item-logi:hover {
+    @apply bg-[#132651];
+}
+
+.logistics-menu-item-logi.active {
+    @apply bg-[#132651];
+}
+
+/* 우측 버튼은 비활성 느낌 */
+.logistics-menu-item-cctv {
+    @apply bg-white/5;
+}
+
+/* 가운데 */
+.logistics-main {
+    @apply bg-white border-r border-slate-200;
+}
+
+.logistics-main-header {
+    @apply bg-white h-14 flex items-center justify-between pt-6 pl-6 pr-6 mb-6;
+}
+
+.logistics-main-header h2 {
+    @apply text-[28px] font-bold text-slate-900 leading-tight;
+}
+
+.logistics-main-actions {
+    @apply flex gap-2;
+}
+
+.logistics-btn-date {
+    @apply h-10 px-4 rounded-md border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-50 transition-colors;
+}
+
+.logistics-btn-excel {
+    @apply h-10 px-4 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors;
+}
+
+.logistics-btn-scan {
+    @apply h-10 px-4 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors;
+}
+
+.logistics-table-area {
+    @apply h-full border-slate-200 bg-slate-50 p-4;
+}
+
+.logistics-table-head {
+    @apply h-12 grid items-center px-4 rounded-t-lg border border-white bg-slate-100 text-slate-600 text-[17px] font-semibold;
+    grid-template-columns: 50px 140px 1fr 80px 90px 1fr;
+}
+
+/* 우측 */
+.logistics-detail {
+    @apply bg-slate-50 flex flex-col;
+}
+
+.logistics-detail-header {
+    @apply h-11 flex items-center justify-between pt-4 pr-4 pl-4 mb-4;
+}
+
+.logistics-detail-header h3 {
+    @apply text-[24px] font-semibold text-slate-900;
+}
+
+.logistics-close-btn {
+    @apply w-8 h-8 rounded-md text-slate-500 hover:bg-slate-200;
+}
+
+.logistics-preview {
+    @apply bg-slate-200 py-4;
+}
+
+.original-preview {
+    @apply mx-4 h-95 rounded-md border border-dashed border-slate-300 bg-white text-slate-400 flex items-center justify-center;
+}
+
+.form-container {
+    @apply bg-white h-full;
+}
+
+.logistics-ocr-msg {
+    @apply mx-8 mt-4 text-sm text-blue-600 bg-blue-50 rounded-md px-4 py-3;
+}
+
+.logistics-form {
+    @apply mx-8 mt-4;
+}
+
+.logistics-form > label {
+    @apply block text-sm font-medium text-slate-700 mb-3;
+}
+
+.logistics-form input {
+    @apply mt-1 w-full h-12 rounded-md border border-slate-300 bg-white px-3 text-[17px] text-slate-900 outline-none;
+}
+
+.logistics-form input:focus {
+    @apply border-blue-500;
+}
+
+.logistics-form-row {
+    @apply grid grid-cols-[1fr_120px] gap-2;
+}
+
+.logistics-form-row label {
+    @apply block text-sm font-medium text-slate-700;
+}
+
+.logistics-form-row input {
+    @apply mt-1 w-full h-12 rounded-md border border-slate-300 bg-white px-3 text-[17px] text-slate-900 outline-none;
+}
+
+.logistics-form-row input:focus {
+    @apply border-blue-500;
+}
+
+.logistics-detail-actions {
+    @apply mt-30 px-8 flex justify-end gap-2;
+}
+
+.logistics-btn-cancel {
+    @apply h-11 px-5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors;
+}
+
+.logistics-btn-save {
+    @apply h-11 px-5 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors;
+}
