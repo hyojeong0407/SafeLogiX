@@ -1,6 +1,6 @@
 import './App.css'
-// import Cctv from './component/Cctv'
-import Logistics from './component/Logistics'
+import Cctv from './component/Cctv'
+// import Logistics from './component/Logistics'
 // import safelogixLogo from './assets/SafeLogiXlogo.png'
 // import secure from './assets/Secure.png'
 // import document from './assets/Document.png'
@@ -23,8 +23,8 @@ function App() {
         <p className="icon-text">문서</p>
       </div> */}
 
-      {/* <Cctv /> */}
-      <Logistics />
+      <Cctv />
+      {/* <Logistics /> */}
 
     </div>
   )

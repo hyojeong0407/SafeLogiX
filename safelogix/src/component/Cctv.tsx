@@ -39,26 +39,28 @@ function Cctv() {
 
                 <div className="cctv-preview">이미지/스냅샷 영역</div>
 
-                <div className="cctv-info">
-                    <p>감지내용: </p>
-                    <p>발생시간: </p>
-                </div>
-
-                <div className="state-box">
-                    <p className="label">관리자 검수 상태</p>
-                    <div className="state-actions">
-                        <button type="button" className="state-btn">미확인</button>
-                        <button type="button" className="state-btn active">경고 확정</button>
-                        <button type="button" className="state-btn">오탐지/정상</button>
+                <div className="record-container">
+                    <div className="cctv-info">
+                        <p>감지내용: </p>
+                        <p>발생시간: </p>
                     </div>
-                </div>
 
-                <div className="memo-box">
-                    <p className="label">조치사항 및 메모</p>
-                    <textarea placeholder="작업자에게 경고 조치함." />
-                </div>
+                    <div className="state-box">
+                        <p className="label">관리자 검수 상태</p>
+                        <div className="state-actions">
+                            <button type="button" className="state-btn">미확인</button>
+                            <button type="button" className="state-btn active">경고 확정</button>
+                            <button type="button" className="state-btn">오탐지/정상</button>
+                        </div>
+                    </div>
 
-                <button type="button" className="update-btn">기록 업데이트</button>
+                    <div className="memo-box">
+                        <p className="label">조치사항 및 메모</p>
+                        <textarea placeholder="작업자에게 경고 조치함." />
+                    </div>
+
+                    <button type="button" className="update-btn">기록 업데이트</button>
+                </div>
             </section>
         </div>
     );

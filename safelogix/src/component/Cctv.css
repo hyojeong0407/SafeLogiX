@@ -67,11 +67,11 @@
 }
 
 .table-head {
-    @apply h-11 bg-slate-100 text-slate-600 text-[17px] font-semibold;
+    @apply h-11 border border-white bg-slate-100 text-slate-600 text-[17px] font-semibold;
 }
 
 .cctv-detail {
-    @apply bg-white;
+    @apply bg-slate-50 flex flex-col;
 }
 
 .cctv-detail-header {
@@ -87,11 +87,15 @@
 }
 
 .cctv-preview {
-    @apply h-80 bg-[#0b1738] text-white/70 flex items-center justify-center;
+    @apply h-105 bg-[#0b1738] text-white/70 flex items-center justify-center;
+}
+
+.record-container {
+    @apply bg-white h-full;
 }
 
 .cctv-info {
-    @apply h-30 bg-slate-50 text-black/60 rounded-lg m-5 p-4;
+    @apply h-30 bg-slate-100 text-black/60 rounded-lg m-5 p-4;
 }
 
 .state-box {
@@ -123,9 +127,9 @@
 }
 
 .memo-box textarea {
-    @apply w-130 rounded-md border border-slate-300 p-3 ml-5 text-sm bg-white;
+    @apply w-130 h-30 rounded-md border border-slate-300 p-3 ml-5 text-sm bg-white;
 }
 
 .update-btn {
-    @apply mt-5 ml-5 w-130 h-12 rounded-md bg-[#17243f] text-white font-semibold hover:bg-[#243553];
+    @apply mt-5 ml-5 w-130 h-14 rounded-md bg-[#17243f] text-white font-semibold hover:bg-[#243553];
 }
