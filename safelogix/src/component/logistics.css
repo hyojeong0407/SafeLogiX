@@ -19,7 +19,7 @@
 
 .logistics-menu-item-logi,
 .logistics-menu-item-cctv {
-    @apply h-11 rounded-md text-left px-4 text-white transition-colors duration-150;
+    @apply h-11 rounded-md text-left px-4 text-white transition-colors duration-150 cursor-pointer;
     background: rgba(255, 255, 255, 0.06);
 }
 
@@ -31,9 +31,8 @@
     @apply bg-[#132651];
 }
 
-/* 우측 버튼은 비활성 느낌 */
-.logistics-menu-item-cctv {
-    @apply bg-white/5;
+.logistics-menu-item-cctv:hover {
+    @apply bg-[#3a1b2c];
 }
 
 /* 가운데 */
@@ -69,8 +68,14 @@
     @apply h-full border-slate-200 bg-slate-50 p-4;
 }
 
+.logistics-table-head,
+.logistics-table-row {
+    @apply grid items-center px-4;
+    grid-template-columns: 50px 140px 1fr 80px 90px 1fr;
+}
+
 .logistics-table-head {
-    @apply h-12 grid items-center px-4 rounded-t-lg border border-white bg-slate-100 text-slate-600 text-[17px] font-semibold;
+    @apply h-12 rounded-t-lg border border-white bg-slate-100 text-slate-600 text-[17px] font-semibold;
     grid-template-columns: 50px 140px 1fr 80px 90px 1fr;
 }
 

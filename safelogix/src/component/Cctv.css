@@ -17,8 +17,14 @@
     @apply flex flex-col gap-3;
 }
 
+.cctv-menu-item-logi,
 .cctv-menu-item-cctv {
-    @apply h-11 rounded-md text-left px-4 bg-white/5;
+    @apply h-11 rounded-md text-left px-4 text-white transition-colors duration-150 cursor-pointer;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.cctv-menu-item-logi:hover {
+    @apply bg-[#132651];
 }
 
 .cctv-menu-item-cctv:hover {
@@ -36,7 +42,6 @@
 .cctv-main-header {
     @apply bg-white h-14 flex items-center justify-between pt-6 pl-6 pr-6 mb-6;
 }
-
 
 .cctv-main-header h2 {
     @apply text-[28px] font-bold text-slate-900 leading-tight;
@@ -60,14 +65,14 @@
     @apply h-full border-slate-200 bg-slate-50 p-4;
 }
 
-.table-head,
-.table-row {
-    @apply grid items-center px-3;
+.cctv-table-head,
+.cctv-table-row {
+    @apply grid items-center px-4;
     grid-template-columns: 50px 110px 1fr 1fr 90px;
 }
 
-.table-head {
-    @apply h-11 border border-white bg-slate-100 text-slate-600 text-[17px] font-semibold;
+.cctv-table-head {
+    @apply h-12 rounded-t-lg border border-white bg-slate-100 text-slate-600 text-[17px] font-semibold;
 }
 
 .cctv-detail {

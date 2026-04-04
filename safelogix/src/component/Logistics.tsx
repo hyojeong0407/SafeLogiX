@@ -1,77 +1,95 @@
 import './logistics.css'
 
-function Logistics() {
-    return (
-        <div className="logistics-container">
-            <aside className="logistics-sidebar">
-                <h1 className="logistics-logo">SafeLogiX</h1>
-                <nav className="logistics-menu">
-                    <button type="button" className="logistics-menu-item-logi">물류 현황</button>
-                    <button type="button" className="logistics-menu-item-cctv">CCTV 기록</button>
-                </nav>
-            </aside>
+type View = 'home' | 'cctv' | 'logistics'
 
-            <main className="logistics-main">
-                <header className="logistics-main-header">
-                    <h2>물류 및 재고 현황</h2>
-                    <div className="logistics-main-actions">
-                        <button type="button" className="logistics-btn-date">기간 설정</button>
-                        <button type="button" className="logistics-btn-excel">엑셀 다운로드</button>
-                        <button type="button" className="logistics-btn-scan">문서 스캔</button>
-                    </div>
-                </header>
-
-                <section className="logistics-table-area">
-                    <div className="logistics-table-head">
-                        <span>No</span>
-                        <span>날짜</span>
-                        <span>품목명</span>
-                        <span>구분</span>
-                        <span>수량</span>
-                        <span>업체명</span>
-                    </div>
-                </section>
-            </main>
-
-            <section className="logistics-detail">
-                <header className="logistics-detail-header">
-                    <h3>문서 스캔 및 AI 검수</h3>
-                    <button type="button" className="logistics-close-btn">X</button>
-                </header>
-
-                <div className="logistics-preview">
-                    <div className="original-preview">거래명세서 원본 이미지</div>
-                </div>
-
-                <div className="form-container">
-                    <p className="logistics-ocr-msg">OCR 인식 결과가 여기에 표시됩니다.</p>
-
-                    <div className="logistics-form">
-                        <label>
-                            업체명
-                            <input type="text" />
-                        </label>
-
-                        <div className="logistics-form-row">
-                            <label>
-                                품목명
-                                <input type="text" />
-                            </label>
-                            <label>
-                                수량
-                                <input type="number" />
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="logistics-detail-actions">
-                        <button type="button" className="logistics-btn-cancel">취소</button>
-                        <button type="button" className="logistics-btn-save">검수 완료 및 저장</button>
-                    </div>
-                </div>
-            </section>
-        </div>
-    );
+interface LogisticsProps {
+    onNavigate: (view: View) => void
 }
 
-export default Logistics;
+function Logistics({ onNavigate }: LogisticsProps) {
+  return (
+    <div className="logistics-container">
+        <aside className="logistics-sidebar">
+            <h1 className="logistics-logo">SafeLogiX</h1>
+            <nav className="logistics-menu">
+                <button
+                    type="button"
+                    className="logistics-menu-item-logi active"
+                    onClick={() => onNavigate('logistics')}
+                >
+                    물류 현황
+                </button>
+                <button
+                    type="button"
+                    className="logistics-menu-item-cctv"
+                    onClick={() => onNavigate('cctv')}
+                >
+                    CCTV 기록
+                </button>
+            </nav>
+        </aside>
+
+        <main className="logistics-main">
+            <header className="logistics-main-header">
+                <h2>물류 및 재고 현황</h2>
+                <div className="logistics-main-actions">
+                    <button type="button" className="logistics-btn-date">기간 설정</button>
+                    <button type="button" className="logistics-btn-excel">엑셀 다운로드</button>
+                    <button type="button" className="logistics-btn-scan">문서 스캔</button>
+                </div>
+            </header>
+
+            <section className="logistics-table-area">
+                <div className="logistics-table-head">
+                    <span>No</span>
+                    <span>날짜</span>
+                    <span>품목명</span>
+                    <span>구분</span>
+                    <span>수량</span>
+                    <span>업체명</span>
+                </div>
+            </section>
+        </main>
+
+        <section className="logistics-detail">
+            <header className="logistics-detail-header">
+                <h3>문서 스캔 및 AI 검수</h3>
+                <button type="button" className="logistics-close-btn">X</button>
+            </header>
+
+            <div className="logistics-preview">
+                <div className="original-preview">거래명세서 원본 이미지</div>
+            </div>
+
+            <div className="form-container">
+                <p className="logistics-ocr-msg">OCR 인식 결과가 여기에 표시됩니다.</p>
+
+                <div className="logistics-form">
+                    <label>
+                    업체명
+                    <input type="text" />
+                    </label>
+
+                    <div className="logistics-form-row">
+                    <label>
+                        품목명
+                        <input type="text" />
+                    </label>
+                    <label>
+                        수량
+                        <input type="number" />
+                    </label>
+                    </div>
+                </div>
+
+                <div className="logistics-detail-actions">
+                    <button type="button" className="logistics-btn-cancel">취소</button>
+                    <button type="button" className="logistics-btn-save">검수 완료 및 저장</button>
+                </div>
+            </div>
+        </section>
+    </div>
+  )
+}
+
+export default Logistics
