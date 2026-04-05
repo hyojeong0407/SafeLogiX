@@ -24,7 +24,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('https://suddenly-unevadible-marshall.ngrok-free.dev/login', {
+      const response = await fetch('http://192.168.0.15:8000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
