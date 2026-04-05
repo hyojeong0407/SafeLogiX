@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './Cctv.css'
 
 type View = 'home' | 'cctv' | 'logistics'
@@ -7,33 +8,41 @@ interface CctvProps {
 }
 
 function Cctv({ onNavigate }: CctvProps) {
+  const [showDetail, setShowDetail] = useState(false)
+
   return (
-    <div className="cctv-container">
+    <div className={showDetail ? 'cctv-container' : 'cctv-container no-detail'}>
       <aside className="cctv-sidebar">
-        <h1 className="cctv-logo">SafeLogiX</h1>
-        <nav className="cctv-menu">
-            <button
-                type="button"
-                className="cctv-menu-item-logi"
-                onClick={() => onNavigate('logistics')}
-            >
-                물류 현황
-            </button>
-            <button
-                type="button"
-                className="cctv-menu-item-cctv active"
-                onClick={() => onNavigate('cctv')}
-            >
-                CCTV 기록
-            </button>
-        </nav>
+            <h1 className="cctv-logo">SafeLogiX</h1>
+            <nav className="cctv-menu">
+                <button
+                    type="button"
+                    className="cctv-menu-item-logi"
+                    onClick={() => onNavigate('logistics')}
+                >
+                    물류 현황
+                </button>
+                <button
+                    type="button"
+                    className="cctv-menu-item-cctv active"
+                    onClick={() => onNavigate('cctv')}
+                >
+                    CCTV 기록
+                </button>
+            </nav>
       </aside>
 
       <main className="cctv-main">
         <header className="cctv-main-header">
             <h2>AI 위험 감지 로그</h2>
             <div className="cctv-main-actions">
-                <button type="button" className="btn-filter">위험 필터</button>
+                <button
+                type="button"
+                className="btn-filter"
+                onClick={() => setShowDetail(true)}
+                >
+                위험 필터
+                </button>
                 <button type="button" className="btn-download">안전 보고서 다운로드</button>
             </div>
         </header>
@@ -49,15 +58,22 @@ function Cctv({ onNavigate }: CctvProps) {
         </section>
       </main>
 
-      <section className="cctv-detail">
-        <header className="cctv-detail-header">
+      {showDetail && (
+        <section className="cctv-detail">
+          <header className="cctv-detail-header">
             <h3>위험 기록 상세 검수</h3>
-            <button type="button" className="close-btn">X</button>
-        </header>
+            <button
+              type="button"
+              className="close-btn"
+              onClick={() => setShowDetail(false)}
+            >
+              X
+            </button>
+          </header>
 
-        <div className="cctv-preview">이미지/스냅샷 영역</div>
+          <div className="cctv-preview">이미지/스냅샷 영역</div>
 
-        <div className="record-container">
+          <div className="record-container">
             <div className="cctv-info">
                 <p>감지내용: </p>
                 <p>발생시간: </p>
@@ -66,9 +82,9 @@ function Cctv({ onNavigate }: CctvProps) {
             <div className="state-box">
                 <p className="label">관리자 검수 상태</p>
                 <div className="state-actions">
-                <button type="button" className="state-btn">미확인</button>
-                <button type="button" className="state-btn active">경고 확정</button>
-                <button type="button" className="state-btn">오탐지/정상</button>
+                    <button type="button" className="state-btn">미확인</button>
+                    <button type="button" className="state-btn active">경고 확정</button>
+                    <button type="button" className="state-btn">오탐지/정상</button>
                 </div>
             </div>
 
@@ -78,8 +94,9 @@ function Cctv({ onNavigate }: CctvProps) {
             </div>
 
             <button type="button" className="update-btn">기록 업데이트</button>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
