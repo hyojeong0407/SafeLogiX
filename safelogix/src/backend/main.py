@@ -7,8 +7,8 @@ from supabase import create_client, Client
 # 1. Supabase 연결 설정
 # (여기에 본인의 Supabase URL과 API Key를 꼭 입력하세요!)
 # ---------------------------------------------------------
-SUPABASE_URL = "본인의_SUPABASE_PROJECT_URL"
-SUPABASE_KEY = "본인의_SUPABASE_ANON_KEY"
+SUPABASE_URL = "https://nronrfdqhtuwqhvrewmq.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yb25yZmRxaHR1d3FodnJld21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNDc5MDAsImV4cCI6MjA5MDkyMzkwMH0.a2rRZg6lDBNAJlfB8B7308MwHxSCIgLLY44BAVLe5M8"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
