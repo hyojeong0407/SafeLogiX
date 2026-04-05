@@ -22,6 +22,17 @@
 }
 
 .cctv-menu-item-logi,
+.cctv-menu-item-cctv,
+.btn-filter,
+.btn-download {
+    @apply inline-flex items-center gap-2;
+}
+
+.close-btn {
+    @apply inline-flex items-center justify-center;
+}
+
+.cctv-menu-item-logi,
 .cctv-menu-item-cctv {
     @apply h-11 rounded-md text-left px-4 text-white transition-colors duration-150 cursor-pointer;
     background: rgba(255, 255, 255, 0.06);
@@ -56,13 +67,13 @@
 }
 
 .btn-filter {
-    @apply h-10 px-4 rounded-md border border-slate-300 bg-white text-slate-700 text-sm
-    hover:bg-slate-50 transition-colors;
+    @apply h-10 px-4 rounded-md border border-slate-300 bg-white text-slate-700 text-base
+    hover:bg-slate-50 transition-colors cursor-pointer;
 }
 
 .btn-download {
-    @apply h-10 px-4 rounded-md bg-red-600 text-white text-sm font-medium
-    hover:bg-red-700 transition-colors;
+    @apply h-10 px-4 rounded-md bg-red-600 text-white text-base
+    hover:bg-red-700 transition-colors cursor-pointer;
 }
 
 .cctv-table-area {
@@ -92,7 +103,7 @@
 }
 
 .close-btn {
-    @apply w-8 h-8 rounded-md text-slate-500 hover:bg-slate-200;
+    @apply w-8 h-8 rounded-md text-slate-500 hover:bg-slate-200 cursor-pointer;
 }
 
 .cctv-preview {

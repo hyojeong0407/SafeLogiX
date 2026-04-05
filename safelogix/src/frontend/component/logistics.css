@@ -22,6 +22,18 @@
 }
 
 .logistics-menu-item-logi,
+.logistics-menu-item-cctv,
+.logistics-btn-date,
+.logistics-btn-excel,
+.logistics-btn-scan {
+  @apply inline-flex items-center gap-2;
+}
+
+.logistics-close-btn {
+  @apply inline-flex items-center justify-center;
+}
+
+.logistics-menu-item-logi,
 .logistics-menu-item-cctv {
     @apply h-11 rounded-md text-left px-4 text-white transition-colors duration-150 cursor-pointer;
     background: rgba(255, 255, 255, 0.06);
@@ -57,15 +69,15 @@
 }
 
 .logistics-btn-date {
-    @apply h-10 px-4 rounded-md border border-slate-300 bg-white text-slate-700 text-sm hover:bg-slate-50 transition-colors;
+    @apply h-10 px-4 rounded-md border border-slate-300 bg-white text-slate-700 text-base hover:bg-slate-50 transition-colors cursor-pointer;
 }
 
 .logistics-btn-excel {
-    @apply h-10 px-4 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors;
+    @apply h-10 px-4 rounded-md bg-emerald-600 text-white text-base font-medium hover:bg-emerald-700 transition-colors cursor-pointer;
 }
 
 .logistics-btn-scan {
-    @apply h-10 px-4 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors;
+    @apply h-10 px-4 rounded-md bg-blue-600 text-white text-base font-medium hover:bg-blue-700 transition-colors cursor-pointer;
 }
 
 .logistics-table-area {
@@ -97,7 +109,7 @@
 }
 
 .logistics-close-btn {
-    @apply w-8 h-8 rounded-md text-slate-500 hover:bg-slate-200;
+    @apply w-8 h-8 rounded-md text-slate-500 hover:bg-slate-200 cursor-pointer;
 }
 
 .logistics-preview {

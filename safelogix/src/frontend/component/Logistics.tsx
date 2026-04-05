@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Boxes, Shield, CalendarDays, FileSpreadsheet, ScanLine, X, FileText, Search } from 'lucide-react'
 import './logistics.css'
 
 type View = 'home' | 'cctv' | 'logistics'
@@ -20,14 +21,16 @@ function Logistics({ onNavigate }: LogisticsProps) {
             className="logistics-menu-item-logi active"
             onClick={() => onNavigate('logistics')}
           >
-            물류 현황
+            <Boxes size={18} />
+            <span>물류 현황</span>
           </button>
           <button
             type="button"
             className="logistics-menu-item-cctv"
             onClick={() => onNavigate('cctv')}
           >
-            CCTV 기록
+            <Shield size={18} />
+            <span>CCTV 기록</span>
           </button>
         </nav>
       </aside>
@@ -36,14 +39,21 @@ function Logistics({ onNavigate }: LogisticsProps) {
         <header className="logistics-main-header">
           <h2>물류 및 재고 현황</h2>
           <div className="logistics-main-actions">
-            <button type="button" className="logistics-btn-date">기간 설정</button>
-            <button type="button" className="logistics-btn-excel">엑셀 다운로드</button>
+            <button type="button" className="logistics-btn-date">
+              <CalendarDays size={18} />
+              <span>기간 설정</span>
+            </button>
+            <button type="button" className="logistics-btn-excel">
+              <FileSpreadsheet size={18} />
+              <span>엑셀 다운로드</span>
+            </button>
             <button
               type="button"
               className="logistics-btn-scan"
               onClick={() => setShowDetail(true)}
             >
-              문서 스캔
+              <ScanLine size={18} />
+              <span>문서 스캔</span>
             </button>
           </div>
         </header>
@@ -68,13 +78,23 @@ function Logistics({ onNavigate }: LogisticsProps) {
               type="button"
               className="logistics-close-btn"
               onClick={() => setShowDetail(false)}
+              aria-label="닫기"
             >
-              X
+              <X size={18} />
             </button>
           </header>
 
           <div className="logistics-preview">
-            <div className="original-preview">거래명세서 원본 이미지</div>
+            <div className="original-preview">
+              <div className="preview-center">
+                  <FileText size={42} strokeWidth={1.6} />
+                  <span>거래명세서 원본 이미지</span>
+              </div>
+
+              <button type="button" className="preview-zoom-btn" aria-label="이미지 확대">
+                  <Search size={14} />
+              </button>
+            </div>
           </div>
 
           <div className="form-container">
