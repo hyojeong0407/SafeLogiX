@@ -24,7 +24,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://49.172.228.79:8000/login', {
+      const response = await fetch('https://integer-too-sends-limitations.trycloudflare.com/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

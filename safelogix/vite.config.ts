@@ -10,4 +10,10 @@ export default defineConfig({
     tailwindcss(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  // 👇 여기서부터 추가된 부분입니다 👇
+  server: {
+    host: '0.0.0.0',
+    port: 5176,
+    allowedHosts: true // Cloudflare 등의 외부 터널 접속을 모두 허용합니다!
+  }
 })
