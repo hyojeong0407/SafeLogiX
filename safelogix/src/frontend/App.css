@@ -4,6 +4,15 @@
     --screen-bg: #7F9098;
 }
 
+.login-container {
+    @apply flex flex-col items-center justify-center;
+    min-height: 100vh;
+}
+
+.login-container .img-logo {
+    @apply absolute top-22 w-187.5 h-62.5 object-contain opacity-60;
+}
+
 /* 공통 배경: 모든 화면에서 동일하게 사용 */
 .app {
     @apply min-h-screen flex items-center justify-center;
