@@ -120,6 +120,18 @@
     @apply mx-4 h-95 rounded-md border border-dashed border-slate-300 bg-white text-slate-400 flex items-center justify-center;
 }
 
+.preview-center {
+    @apply h-full flex flex-col items-center justify-center gap-3 text-slate-400;
+}
+
+.preview-zoom-btn {
+    @apply absolute right-2 bottom-2 w-6 h-6 rounded-full border border-slate-300 bg-white text-slate-600 inline-flex items-center justify-center;
+}
+
+.original-preview {
+    @apply relative mx-4 h-95 rounded-md border border-dashed border-slate-300 bg-white;
+}
+
 .form-container {
     @apply bg-white h-full;
 }
