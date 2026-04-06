@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import './App.css'
 import Cctv from './component/Cctv'
+import CameraConnect from './component/CameraConnect'
 import Logistics from './component/Logistics'
 import safelogixLogo from './assets/SafeLogiXlogo.png'
 import secure from './assets/Secure.png'
 import document from './assets/Document.png'
+import camera from './assets/camera.png'
 
-type View = 'home' | 'cctv' | 'logistics'
+type View = 'home' | 'cctv' | 'camera-connect' | 'logistics'
 
 function App() {
   const [view, setView] = useState<View>('home')
@@ -94,6 +96,11 @@ function App() {
               <p className="icon-text">감시</p>
             </div>
 
+            <div className="icon-box camera-pos" onClick={() => setView('camera-connect')}>
+              <img src={camera} alt="Camera" className="img-camera" />
+              <p className="icon-text">카메라 연결</p>
+            </div>
+
             <div className="icon-box document-pos" onClick={() => setView('logistics')}>
               <img src={document} alt="Document" className="img-document" />
               <p className="icon-text">문서</p>
@@ -102,6 +109,13 @@ function App() {
         )}
 
         {view === 'cctv' && <Cctv onNavigate={setView} />}
+        {view === 'camera-connect' && (
+        <CameraConnect
+          title="카메라 연결"
+          connectLabel="연결"
+          onBack={() => setView('home')}
+        />
+      )}
         {view === 'logistics' && <Logistics onNavigate={setView} />}
     </div>
   )
