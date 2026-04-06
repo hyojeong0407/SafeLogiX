@@ -24,7 +24,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('https://49.172.228.79/login', {
+      const response = await fetch('https://49.172.228.79:8000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
