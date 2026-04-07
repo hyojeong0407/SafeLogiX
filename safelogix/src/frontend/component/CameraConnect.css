@@ -71,7 +71,7 @@
 }
 
 .camera-add-form button {
-    @apply inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-slate-900 text-white text-sm font-medium hover:bg-slate-800;
+    @apply inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 cursor-pointer;
 }
 
 /* 목록 상단 헤더 */
