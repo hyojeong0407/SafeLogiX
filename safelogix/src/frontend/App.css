@@ -4,51 +4,46 @@
     --screen-bg: #7F9098;
 }
 
+.app {
+    @apply min-h-screen flex items-center justify-center overflow-hidden;
+    background-color: var(--screen-bg);
+}
+
+.home-stage {
+    @apply relative w-[1850px] max-w-[95vw] h-[900px];
+}
+
 .login-container {
     @apply flex flex-col items-center justify-center;
     min-height: 100vh;
 }
 
 .login-container .img-logo {
-    @apply absolute top-22 w-187.5 h-62.5 object-contain opacity-60;
-}
-
-/* 공통 배경: 모든 화면에서 동일하게 사용 */
-.app {
-    @apply min-h-screen flex items-center justify-center;
-    background-color: var(--screen-bg);
+    @apply absolute top-22 left-1/2 -translate-x-1/2 w-187.5 h-62.5 object-contain opacity-60;
 }
 
 .img-logo {
-    @apply absolute top-22 w-187.5 h-62.5 object-contain opacity-60;
+    @apply absolute top-22 left-1/2 -translate-x-1/2 w-187.5 h-62.5 object-contain opacity-60;
 }
 
-/* 이미지 + 텍스트를 세로로 배치 */
 .icon-box {
     @apply absolute flex flex-col items-center bg-transparent border-0 p-0 cursor-pointer;
 }
 
-/* 기존 위치값을 박스에 적용 */
 .secure-pos {
     @apply top-137.5 left-122.5 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)];
 }
 
 .camera-pos {
-    @apply top-137.5 left-1/2 transform -translate-x-1/2 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)];
+    @apply top-137.5 left-1/2 -translate-x-1/2 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)];
 }
 
 .document-pos {
     @apply top-137.5 right-122.5 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)];
 }
 
-.img-secure {
-    @apply w-27.5 h-27.5 object-contain;
-}
-
-.img-camera {
-    @apply w-27.5 h-27.5 object-contain;
-}
-
+.img-secure,
+.img-camera,
 .img-document {
     @apply w-27.5 h-27.5 object-contain;
 }

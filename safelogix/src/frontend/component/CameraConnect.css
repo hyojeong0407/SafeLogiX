@@ -1,9 +1,11 @@
 @import "tailwindcss";
 
+/* 전체 카메라 연결 화면 크기와 배경 */
 .camera-connect {
     @apply w-[1850px] max-w-[95vw] h-[900px] bg-slate-100 rounded-xl overflow-hidden shadow-xl;
 }
 
+/* 상단 제목 영역 */
 .camera-connect-header {
     @apply h-16 px-6 flex items-center border-b border-slate-200 bg-white;
 }
@@ -12,52 +14,83 @@
     @apply text-2xl font-bold text-slate-900;
 }
 
+/* 뒤로가기 버튼 */
 .camera-back-btn {
     @apply ml-auto inline-flex items-center gap-2 h-9 px-3 rounded-md cursor-pointer border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors;
 }
 
+/* 본문은 좌우 2분할 */
 .camera-connect-body {
     @apply h-[calc(100%-64px)] grid;
     grid-template-columns: 1fr 1fr;
 }
 
+/* 왼쪽 미리보기 영역 */
 .camera-preview {
     @apply bg-slate-50 border-r border-slate-200 p-6;
 }
 
+/* 미리보기 중앙 정렬 박스 */
 .camera-preview-center {
-    @apply h-full rounded-lg border border-dashed border-slate-300 bg-white text-slate-500 flex flex-col items-center justify-center gap-2;
+    @apply h-full rounded-lg border border-dashed border-slate-300 bg-white text-slate-500 flex flex-col items-center justify-center gap-2 p-4;
 }
 
+/* 실제 스트림이 들어올 때 쓰는 영상 영역 */
+.camera-preview-video {
+    @apply w-full h-[calc(100%-52px)] rounded-lg object-cover bg-black;
+}
+
+/* 선택된 카메라 이름 */
 .preview-title {
     @apply text-lg font-semibold text-slate-700;
 }
 
+/* 선택된 카메라 위치 설명 */
 .preview-sub {
     @apply text-sm text-slate-500 mb-2;
 }
 
+/* 연결 버튼 */
 .camera-connect-btn {
     @apply inline-flex items-center gap-2 h-10 px-4 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed;
 }
 
+/* 오른쪽 목록 영역 */
 .camera-list-wrap {
     @apply bg-white p-6;
 }
 
+/* 새 카메라 추가 입력 영역 */
+.camera-add-form {
+    @apply mb-4 grid gap-2;
+    grid-template-columns: 1fr 1fr auto;
+}
+
+.camera-add-form input {
+    @apply h-10 px-3 rounded-md border border-slate-300 bg-white text-sm text-slate-800 outline-none focus:border-blue-500;
+}
+
+.camera-add-form button {
+    @apply inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-slate-900 text-white text-sm font-medium hover:bg-slate-800;
+}
+
+/* 목록 상단 헤더 */
 .camera-list-head {
     @apply h-12 grid items-center px-4 rounded-t-lg bg-slate-100 text-slate-600 text-sm font-semibold;
     grid-template-columns: 140px 1fr 100px;
 }
 
+/* 목록 전체 컨테이너 */
 .camera-list-body {
     @apply border border-slate-200 border-t-0 rounded-b-lg overflow-hidden;
 }
 
+/* 등록된 카메라가 없을 때 표시 */
 .camera-empty {
     @apply h-20 flex items-center justify-center text-slate-400 text-sm;
 }
 
+/* 카메라 한 줄 */
 .camera-row {
     @apply w-full h-12 grid items-center px-4 text-left text-sm text-slate-700 border-b border-slate-100 hover:bg-slate-50;
     grid-template-columns: 140px 1fr 100px;
@@ -67,14 +100,17 @@
     @apply border-b-0;
 }
 
+/* 현재 선택된 카메라 강조 */
 .camera-row.active {
     @apply bg-blue-50;
 }
 
+/* 온라인 상태 */
 .status-on {
     @apply text-emerald-600 font-medium;
 }
 
+/* 오프라인 상태 */
 .status-off {
     @apply text-red-600 font-medium;
 }
