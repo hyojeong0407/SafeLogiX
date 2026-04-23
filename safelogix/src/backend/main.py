@@ -1,15 +1,24 @@
-from fastapi import FastAPI, HTTPException
+import os
+import base64
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from supabase import create_client, Client
+from openai import AsyncOpenAI
+from dotenv import load_dotenv
 
 # ---------------------------------------------------------
-# 1. Supabase 연결 설정
-# (여기에 본인의 Supabase URL과 API Key를 꼭 입력하세요!)
+# 1. 환경 변수 로드 및 Supabase 연결 설정
 # ---------------------------------------------------------
-SUPABASE_URL = "https://nronrfdqhtuwqhvrewmq.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yb25yZmRxaHR1d3FodnJld21xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNDc5MDAsImV4cCI6MjA5MDkyMzkwMH0.a2rRZg6lDBNAJlfB8B7308MwHxSCIgLLY44BAVLe5M8"
+
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
 app = FastAPI()
 
@@ -36,7 +45,13 @@ class CreateCodeRequest(BaseModel):
     role: str = "USER"
 
 # ---------------------------------------------------------
-# 4. API 엔드포인트
+# 4. 유틸리티 함수: 이미지 Base64 인코딩
+# ---------------------------------------------------------
+async def encode_image(file: UploadFile):
+    contents = await file.read()
+    return base64.b64encode(contents).decode("utf-8")
+# ---------------------------------------------------------
+# 5. API앤드 포인트
 # ---------------------------------------------------------
 
 @app.get("/")
@@ -94,3 +109,30 @@ def generate_access_code(req: CreateCodeRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"코드 발급 실패: {str(e)}")
+    
+# [기능 3] YOLOv10객체 탐지 파이프라인
+
+@app.post("/api/alerts")
+async def receive_alert(
+    violation_type: str = Form(...),
+    location: str = Form(...),
+    file: UploadFile = File(...)
+):
+    # 1. 파일 읽기
+    image_bytes = await file.read()
+    
+    # 2. Supabase Storage에 이미지 업로드 (선택)
+    # file_path = f"alerts/{file.filename}"
+    # supabase.storage.from_("snapshots").upload(file_path, image_bytes)
+    
+    # 3. Supabase DB 'alerts' 테이블에 위반 기록 저장
+    # supabase.table("alerts").insert({
+    #     "type": violation_type,
+    #     "location": location,
+    #     "image_url": "업로드된_스토리지_URL"
+    # }).execute()
+
+    return {"status": "success", "message": "경고가 시스템에 등록되었습니다."}
+
+
+
