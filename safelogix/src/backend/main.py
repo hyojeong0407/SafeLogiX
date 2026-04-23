@@ -44,6 +44,11 @@ class CreateCodeRequest(BaseModel):
     company_id: str
     role: str = "USER"
 
+class CameraConnectRequest(BaseModel):
+    camera_id: str
+    name: str
+    location: str
+
 # ---------------------------------------------------------
 # 4. 유틸리티 함수: 이미지 Base64 인코딩
 # ---------------------------------------------------------
@@ -134,5 +139,17 @@ async def receive_alert(
 
     return {"status": "success", "message": "경고가 시스템에 등록되었습니다."}
 
+# [기능 4] 카메라연결
 
+@app.post("/camera/connect")
+async def connect_camera(req: CameraConnectRequest):
+    # 실제 환경에서는 여기서 RTSP 주소를 검증하거나 카메라 상태를 체크합니다.
+    # 테스트를 위해 성공 메시지와 스트림 주소(보통 로컬 웹캠이나 테스트 경로)를 반환합니다.
+    print(f"카메라 연결 요청: {req.name} ({req.location})")
+    
+    return {
+        "status": "online",
+        "message": f"{req.name} 카메라가 연결되었습니다.",
+        "stream_url": "0"  # '0'은 서버의 기본 웹캠을 의미합니다. 실제 CCTV라면 rtsp://... 주소
+    }
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Camera, Link2, ArrowLeft, Plus } from 'lucide-react'
 import './CameraConnect.css'
 
@@ -9,7 +9,6 @@ export type CameraItem = {
     status: 'online' | 'offline'
 }
 
-// 부모 컴포넌트에서 넘겨주는 카메라 연결 화면용 props
 interface CameraConnectProps {
     title?: string
     connectLabel?: string
@@ -35,25 +34,52 @@ function CameraConnect({
     connected = false,
     streamUrl = '',
 }: CameraConnectProps) {
-  // 새 카메라를 추가할 때 입력값을 임시로 저장
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
+  
+  // 💡 비디오 태그를 직접 제어하기 위한 참조(ref) 추가
+  const videoRef = useRef<HTMLVideoElement>(null)
 
-  // 현재 선택된 카메라를 목록에서 찾음
   const selected = cameras.find((c) => c.id === selectedId)
 
-  // 이름과 위치가 모두 들어오면 부모로 전달하고 입력값 초기화
   const handleAdd = () => {
     if (!name.trim() || !location.trim()) return
-
-    onAddCamera({
-      name: name.trim(),
-      location: location.trim(),
-    })
-
+    onAddCamera({ name: name.trim(), location: location.trim() })
     setName('')
     setLocation('')
   }
+
+  // 💡 연결 상태가 바뀌면 카메라를 켜는 로직 추가
+  useEffect(() => {
+    if (connected && videoRef.current) {
+        // streamUrl이 '0'이거나 비어있으면 로컬 웹캠을 켭니다.
+        if (streamUrl === '0' || !streamUrl.startsWith('http')) {
+            navigator.mediaDevices
+                .getUserMedia({ video: true })
+                .then((stream) => {
+                    if (videoRef.current) {
+                        // src가 아닌 srcObject에 카메라 스트림을 연결합니다.
+                        videoRef.current.srcObject = stream
+                    }
+                })
+                .catch((error) => {
+                    console.error('카메라 접근 에러:', error)
+                    alert('카메라 접근 권한을 허용해주세요!')
+                })
+        } else {
+            // 실제 인터넷 영상 주소(.mp4 등)가 오면 src에 바로 넣습니다.
+            videoRef.current.src = streamUrl
+        }
+    }
+
+    // 컴포넌트가 꺼지거나 연결이 해제되면 카메라 끄기
+    return () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const stream = videoRef.current.srcObject as MediaStream
+            stream.getTracks().forEach((track) => track.stop())
+        }
+    }
+  }, [connected, streamUrl])
 
   return (
     <section className="camera-connect">
@@ -68,19 +94,18 @@ function CameraConnect({
       <div className="camera-connect-body">
         <div className="camera-preview">
           <div className="camera-preview-center">
-            {/* 연결 완료 후 스트림 주소가 있으면 영상 화면을 보여줌 */}
-            {connected && streamUrl ? (
+            {connected ? (
+              // 💡 ref={videoRef} 를 추가하여 카메라 화면을 연결합니다.
               <video
+                  ref={videoRef}
                   className="camera-preview-video"
-                  src={streamUrl}
                   autoPlay
                   muted
                   playsInline
-                  controls
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
               <>
-                {/* 연결 전에는 선택된 카메라 이름과 위치를 보여줌 */}
                 <Camera size={44} />
                 <p className="preview-title">
                     {selected ? selected.name : '카메라를 선택하세요'}
@@ -91,7 +116,6 @@ function CameraConnect({
               </>
             )}
 
-            {/* 선택된 카메라가 있을 때만 연결 버튼 활성화 */}
             <button
                 type="button"
                 className="camera-connect-btn"
@@ -105,7 +129,6 @@ function CameraConnect({
         </div>
 
         <div className="camera-list-wrap">
-          {/* 새 카메라를 이름과 위치로 등록하는 입력 영역 */}
           <div className="camera-add-form">
             <input
                 type="text"
@@ -125,19 +148,16 @@ function CameraConnect({
             </button>
           </div>
 
-          {/* 목록 상단 헤더 */}
           <div className="camera-list-head">
               <span>이름</span>
               <span>위치</span>
               <span>상태</span>
           </div>
 
-          {/* 등록된 카메라 목록을 보여줌 */}
           <div className="camera-list-body">
             {cameras.length === 0 && (
                 <div className="camera-empty">등록된 카메라가 없습니다.</div>
             )}
-
             {cameras.map((cam) => (
               <button
                   key={cam.id}

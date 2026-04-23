@@ -18,7 +18,14 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // 휴대폰 카메라 연결 관련 상태
-  const [cameras, setCameras] = useState<CameraItem[]>([])
+  const [cameras, setCameras] = useState<CameraItem[]>([
+  {
+    id: 'test-cam-1',
+    name: '테스트 웹캠',
+    location: '사무실 (내 PC)',
+    status: 'offline'
+  }
+])
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null)
   const [connected, setConnected] = useState(false)
   const [streamUrl, setStreamUrl] = useState('')
