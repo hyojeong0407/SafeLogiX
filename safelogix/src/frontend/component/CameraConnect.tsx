@@ -95,6 +95,18 @@ function CameraConnect({
         <div className="camera-preview">
           <div className="camera-preview-center">
             {connected ? (
+              streamUrl && streamUrl.startsWith('http') ? (
+                <img
+                  src={streamUrl}
+                  alt="Smartphone Stream"
+                  className="camera-preview-video"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    console.error("스트리밍 주소 오류:", streamUrl);
+                    alert("영상을 불러올 수 없습니다. 주소를 확인해주세요.");
+                  }}
+                />
+              ) : (
               // 💡 ref={videoRef} 를 추가하여 카메라 화면을 연결합니다.
               <video
                   ref={videoRef}
@@ -104,6 +116,7 @@ function CameraConnect({
                   playsInline
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
+              )
             ) : (
               <>
                 <Camera size={44} />

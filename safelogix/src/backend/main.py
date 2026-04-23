@@ -143,13 +143,23 @@ async def receive_alert(
 
 @app.post("/camera/connect")
 async def connect_camera(req: CameraConnectRequest):
-    # 실제 환경에서는 여기서 RTSP 주소를 검증하거나 카메라 상태를 체크합니다.
-    # 테스트를 위해 성공 메시지와 스트림 주소(보통 로컬 웹캠이나 테스트 경로)를 반환합니다.
     print(f"카메라 연결 요청: {req.name} ({req.location})")
+    
+    # 만약 이름이나 위치에 '폰' 또는 '스마트폰'이 포함되어 있다면 
+    # 특정 아이피 주소를 사용하도록 임시로 설정 (테스트용)
+    if "폰" in req.name or "스마트폰" in req.name:
+        # 여기에 스마트폰 앱 화면에 뜬 IP 주소를 적으세요!
+        # IP Webcam 앱의 경우 주소 뒤에 /video를 붙여야 영상 스트림이 나옵니다.
+        phone_ip = "http://192.168.200.101:4747/video" 
+        return {
+            "status": "online",
+            "message": "스마트폰 카메라가 연결되었습니다.",
+            "stream_url": phone_ip
+        }
     
     return {
         "status": "online",
         "message": f"{req.name} 카메라가 연결되었습니다.",
-        "stream_url": "0"  # '0'은 서버의 기본 웹캠을 의미합니다. 실제 CCTV라면 rtsp://... 주소
+        "stream_url": "0" 
     }
 
