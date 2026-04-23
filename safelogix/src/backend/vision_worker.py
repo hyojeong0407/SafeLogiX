@@ -1,77 +1,77 @@
 import cv2
-import requests
-import numpy as np
+import os
+import time
+import uuid  # 중복 방지를 위한 uuid 추가
+from datetime import datetime
+from dotenv import load_dotenv
 from ultralytics import YOLO
+from supabase import create_client
 
-# 1. YOLOv10 모델 로드 (커스텀 학습된 가중치 파일이 있다면 경로 변경)
+# .env 로드
+load_dotenv()
+supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+
 model = YOLO("yolov10n.pt") 
 
-# 2. FastAPI 백엔드 엔드포인트 URL
-API_URL = "http://127.0.0.1:8000/api/alerts"
+def process_camera(camera_id, company_id, source_url):
+    cap = cv2.VideoCapture(int(source_url) if source_url == '0' else source_url)
+    if not os.path.exists('temp'): os.makedirs('temp')
 
-# 3. 위험 구역 (다각형 좌표 설정 - 실제 CCTV 화면 비율에 맞춰 조정 필요)
-DANGER_ZONE = np.array([[200, 200], [600, 200], [600, 400], [200, 400]], np.int32)
+    print(f"📸 분석 시작...")
 
-# 4. 카메라 캡처 (0은 기본 웹캠, CCTV 사용 시 RTSP 주소 입력)
-cap = cv2.VideoCapture(0)
+    while cap.isOpened():
+        success, frame = cap.read()
+        if not success: break
 
-def send_alert_to_backend(image_frame, violation_type):
-    """위험 감지 시 FastAPI 서버로 스냅샷 전송"""
-    _, img_encoded = cv2.imencode('.jpg', image_frame)
-    files = {'file': ('snapshot.jpg', img_encoded.tobytes(), 'image/jpeg')}
-    data = {'violation_type': violation_type, 'location': 'Sector A'}
-    
-    try:
-        response = requests.post(API_URL, files=files, data=data)
-        print(f"[{violation_type}] 경고 전송 완료:", response.status_code)
-    except Exception as e:
-        print("서버 전송 실패:", e)
-
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
-
-    # YOLO 모델로 객체 탐지
-    results = model(frame, stream=True, verbose=False)
-
-    for result in results:
-        boxes = result.boxes
-        for box in boxes:
-            # 클래스 ID와 신뢰도(Confidence) 확인
-            cls_id = int(box.cls[0])
-            conf = float(box.conf[0])
+        results = model(frame, conf=0.5, verbose=False)
+        
+        if len(results[0].boxes) > 0:
+            # 💡 해결 1: 파일명 중복 방지 (밀리초 + 랜덤 문자열 추가)
+            ms_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            unique_id = str(uuid.uuid4())[:8] # 짧은 랜덤 키
+            filename = f"safety_{camera_id}_{ms_timestamp}_{unique_id}.jpg"
+            local_path = f"temp/{filename}"
             
-            # COCO 데이터셋 기준: 0은 '사람(person)'
-            if cls_id == 0 and conf > 0.5:
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
+            cv2.imwrite(local_path, frame)
+            
+            try:
+                # 1. Supabase Storage 업로드
+                with open(local_path, 'rb') as f:
+                    supabase.storage.from_("snapshots").upload(filename, f)
                 
-                # 객체 하단 중앙 좌표 (발 위치 추정)
-                bottom_center = (int((x1 + x2) / 2), y2)
+                snapshot_url = supabase.storage.from_("snapshots").get_public_url(filename)
+
+                # 💡 해결 2: ID 데이터 타입 맞추기
+                # 만약 DB 컬럼이 bigint라면 int()로 감싸야 하고, 
+                # UUID(문자열) 타입이라면 그대로 두어야 합니다.
+                # 아래 예시는 에러 메시지에 맞춰 숫자로 변환을 시도하거나 실제 값을 넣는 부분입니다.
                 
-                # OpenCV로 사람 박스 그리기
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.circle(frame, bottom_center, 5, (0, 0, 255), -1)
+                insert_data = {
+                    "company_id": company_id,  # 만약 에러가 계속 나면 DB에서 컬럼 타입을 확인하세요!
+                    "camera_id": camera_id,
+                    "violation_type": "안전 미준수",
+                    "snapshot_url": snapshot_url,
+                    "status": "pending",
+                    "detected_at": datetime.now().isoformat()
+                }
 
-                # 위험 구역 침입 여부 확인 (cv2.pointPolygonTest 사용)
-                inside_zone = cv2.pointPolygonTest(DANGER_ZONE, bottom_center, False)
+                supabase.table("safety_logs").insert(insert_data).execute()
+                print(f"🚀 저장 성공: {snapshot_url}")
                 
-                if inside_zone >= 0:
-                    cv2.putText(frame, "WARNING: INTRUSION", (x1, y1 - 10), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                    
-                    # 캡처 및 서버 전송 (실제 적용 시 연속 전송 방지를 위해 쿨다운 타이머 구현 필요)
-                    send_alert_to_backend(frame, "위험구역 침입")
+                os.remove(local_path)
+                time.sleep(5) # 쿨타임
 
-    # 화면에 위험 구역 그리기
-    cv2.polylines(frame, [DANGER_ZONE], isClosed=True, color=(0, 0, 255), thickness=2)
+            except Exception as e:
+                print(f"❌ 전송 에러: {e}")
 
-    # 결과 화면 출력 (테스트용)
-    cv2.imshow("SafeLogiX AI Monitoring", frame)
+    cap.release()
 
-    # 'q' 키를 누르면 종료
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    # ERD를 보니 camera_id가 int8(숫자)입니다.
+    # 1. Supabase 'cameras' 테이블에 가서 id 숫자를 확인하세요. (예: 1)
+    # 2. 'companies' 테이블의 id는 uuid 타입이 맞습니다.
+    
+    MY_CAMERA_ID = 1  # 실제 cameras 테이블의 id 숫자 입력
+    MY_COMPANY_ID = "e45e0edd-3df3-4978-984d-63ff53302981" # 실제 company uuid 입력
+    
+    process_camera(MY_CAMERA_ID, MY_COMPANY_ID, "0")
