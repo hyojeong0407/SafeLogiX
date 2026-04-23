@@ -83,46 +83,45 @@ function App() {
 
   // 휴대폰 카메라 연결
   const handleConnect = async () => {
-    if (!selectedCameraId) return
+    if (!selectedCameraId) return;
 
-    const selectedCamera = cameras.find((cameraItem) => cameraItem.id === selectedCameraId)
-    if (!selectedCamera) return
+    const selectedCamera = cameras.find((cameraItem) => cameraItem.id === selectedCameraId);
+    if (!selectedCamera) return;
 
     try {
       const response = await fetch('http://49.172.228.79:8000/camera/connect', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           camera_id: selectedCamera.id,
           name: selectedCamera.name,
           location: selectedCamera.location,
         }),
-      })
+      });
+
+      // 💡 여기서 data를 한 번만 선언합니다.
+      const data = await response.json();
 
       if (response.ok) {
-        const data = await response.json()
-
-        // 백엔드가 포트포워딩된 스트림 주소를 내려준다고 가정
-        setStreamUrl(data.stream_url ?? '')
-        setConnected(true)
+        // 백엔드가 전달한 stream_url (예: "http://192.168.0.5:8080/video") 설정
+        setStreamUrl(data.stream_url ?? '');
+        setConnected(true);
 
         setCameras((prev) =>
           prev.map((cameraItem) =>
             cameraItem.id === selectedCamera.id
               ? { ...cameraItem, status: 'online' }
-              : cameraItem,
-          ),
-        )
+              : cameraItem
+          )
+        );
       } else {
-          alert('카메라 연결에 실패했습니다.')
+        alert('카메라 연결에 실패했습니다: ' + (data.message || '알 수 없는 에러'));
       }
     } catch (error) {
-        console.error('카메라 연결 에러:', error)
-        alert('카메라 서버와 연결할 수 없습니다.')
+      console.error('카메라 연결 에러:', error);
+      alert('카메라 서버와 연결할 수 없습니다.');
     }
-  }
+  };
 
   // 💡 1. 로그인이 안 되어 있다면 로그인 화면을 렌더링합니다.
   if (!isAuthenticated) {

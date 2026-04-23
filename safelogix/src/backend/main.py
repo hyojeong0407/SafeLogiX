@@ -1,4 +1,5 @@
 import os
+import re
 import base64
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -143,23 +144,27 @@ async def receive_alert(
 
 @app.post("/camera/connect")
 async def connect_camera(req: CameraConnectRequest):
-    print(f"카메라 연결 요청: {req.name} ({req.location})")
-    
-    # 만약 이름이나 위치에 '폰' 또는 '스마트폰'이 포함되어 있다면 
-    # 특정 아이피 주소를 사용하도록 임시로 설정 (테스트용)
-    if "폰" in req.name or "스마트폰" in req.name:
-        # 여기에 스마트폰 앱 화면에 뜬 IP 주소를 적으세요!
-        # IP Webcam 앱의 경우 주소 뒤에 /video를 붙여야 영상 스트림이 나옵니다.
-        phone_ip = "http://192.168.200.101:4747/video" 
-        return {
-            "status": "online",
-            "message": "스마트폰 카메라가 연결되었습니다.",
-            "stream_url": phone_ip
-        }
-    
+    # 1. 스마트폰 타입인지 확인 ([폰] 접두사 확인)
+    if "[폰]" in req.name:
+        # location 필드에서 괄호 안의 IP 주소 추출 예: "사무실 (192.168.0.5:8080)"
+        ip_match = re.search(r'\((.*?)\)', req.location)
+        
+        if ip_match:
+            ip_address = ip_match.group(1).strip()
+            # http://가 없다면 붙여주고, 끝에 /video를 붙여 MJPEG 스트림 경로 완성
+            stream_url = f"http://{ip_address}/video" if not ip_address.startswith("http") else f"{ip_address}/video"
+            
+            return {
+                "status": "online",
+                "message": "스마트폰 카메라 연결 성공",
+                "stream_url": stream_url
+            }
+        else:
+            return {"status": "error", "message": "IP 주소 형식이 잘못되었습니다."}
+
+    # 2. 웹캠인 경우
     return {
         "status": "online",
-        "message": f"{req.name} 카메라가 연결되었습니다.",
-        "stream_url": "0" 
+        "message": "로컬 웹캠 연결 성공",
+        "stream_url": "0"  # 프론트엔드에서 '0'이면 navigator.mediaDevices 호출
     }
-
