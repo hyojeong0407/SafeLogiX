@@ -1,6 +1,9 @@
 import os
 import re
 import base64
+import json
+import io
+import pandas as pd
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -50,6 +53,12 @@ class CameraConnectRequest(BaseModel):
     name: str
     location: str
 
+class LogisticsSaveRequest(BaseModel):
+    company_id: str  # ERD의 uuid 타입 (어떤 회사의 데이터인지 필요)
+    vendorName: str  # 업체명 (logistics_documents의 vendor_name)
+    itemName: str    # 품목명 (inventory_logs의 item_name)
+    quantity: int    # 수량 (inventory_logs의 quantity)
+    type: str = "IN" # 구분 (ERD의 inventory_logs.type 컬럼용: 기본값 '입고')
 # ---------------------------------------------------------
 # 4. 유틸리티 함수: 이미지 Base64 인코딩
 # ---------------------------------------------------------
@@ -168,3 +177,92 @@ async def connect_camera(req: CameraConnectRequest):
         "message": "로컬 웹캠 연결 성공",
         "stream_url": "0"  # 프론트엔드에서 '0'이면 navigator.mediaDevices 호출
     }
+
+# 💡 [기능 6] 문서 업로드 및 파싱
+@app.post("/upload-excel")
+async def upload_excel(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents))
+        else:
+            df = pd.read_excel(io.BytesIO(contents))
+        
+        if df.empty:
+            raise HTTPException(status_code=400, detail="파일이 비어있습니다.")
+
+        first_row = df.iloc[0].fillna("").to_dict()
+        
+        # 컬럼명 후보군 처리
+        company_name = first_row.get("업체명", first_row.get("Company", ""))
+        item_name = first_row.get("품목명", first_row.get("Item", ""))
+        quantity = first_row.get("수량", first_row.get("Qty", 0))
+
+        return {
+            "company_name": str(company_name).strip(),
+            "item_name": str(item_name).strip(),
+            "quantity": str(quantity).strip()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"엑셀 파싱 실패: {str(e)}")
+    
+    # 💡 [기능 6] 문서 파일 업로드 및 파싱 (Pandas 적용)
+@app.post("/upload-excel")
+async def upload_excel(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        
+        # 파일 확장자에 따라 pandas 읽기 처리
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(contents))
+        elif file.filename.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(io.BytesIO(contents))
+        else:
+            raise HTTPException(status_code=400, detail="지원하지 않는 파일 형식입니다. .xlsx, .xls, .csv 파일만 가능합니다.")
+        
+        if df.empty:
+            raise HTTPException(status_code=400, detail="업로드된 파일이 비어 있습니다.")
+
+        # 첫 번째 로우 데이터를 읽어 키 매핑 시도 (결측치는 빈값 처리)
+        first_row = df.iloc[0].fillna("").to_dict()
+        
+        # 문서 구조의 유연성을 위해 다양한 컬럼명 후보군 탐색
+        company_name = first_row.get("업체명", first_row.get("Company", first_row.get("상호", "")))
+        item_name = first_row.get("품목명", first_row.get("Item", first_row.get("품명", "")))
+        quantity = first_row.get("수량", first_row.get("Qty", first_row.get("수량(EA)", 0)))
+
+        return {
+            "company_name": str(company_name).strip(),
+            "item_name": str(item_name).strip(),
+            "quantity": str(quantity).strip()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"문서 파싱 실패: {str(e)}")
+    
+    # 💡 [기능 7] 최종 검수 데이터 Supabase 테이블에 저장
+
+    @app.post("/save-logistics")
+    async def save_logistics(item: LogisticsSaveRequest):
+        try:
+            # 1. logistics_documents 테이블에 먼저 업체(Vendor) 기록
+            doc_res = supabase.table("logistics_documents").insert({
+                "company_id": item.company_id,
+                "vendor_name": item.companyName,
+                "document_date": "now()"
+            }).execute()
+            
+            new_doc_id = doc_res.data[0]['id']
+
+            # 2. inventory_logs 테이블에 품목 상세 기록 (외래키 연결)
+            log_res = supabase.table("inventory_logs").insert({
+                "company_id": item.company_id,
+                "document_id": new_doc_id,
+                "item_name": item.itemName,
+                "quantity": item.quantity,
+                "type": "IN", # 입고로 고정
+                "unit": "EA"
+            }).execute()
+
+            return {"status": "success", "data": log_res.data}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"DB 저장 오류: {str(e)}")
