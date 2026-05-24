@@ -7,6 +7,7 @@ import pandas as pd
 import uuid
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from supabase import create_client, Client
 from openai import AsyncOpenAI
@@ -372,3 +373,75 @@ def get_logistics_list(company_id: str):
         # 구체적인 에러 확인을 위해 서버 터미널에 에러 로그 출력
         print(f"불러오기 에러 상세: {str(e)}")
         raise HTTPException(status_code=500, detail=f"데이터 불러오기 실패: {str(e)}")
+    
+# [기능 9] 데이터 기간으로 필터링해 엑셀파일 변환
+@app.get("/download-logistics")
+async def download_logistics(
+    start_date: str, 
+    end_date: str, 
+    company_id: str, # 💡 프론트엔드에서 넘겨받아야 함
+    format: str = "excel"
+):
+    try:
+        # 1. DB에서 날짜 범위 및 회사 ID에 해당하는 데이터 실제 조회
+        # .gte(크거나 같음), .lte(작거나 같음) 필터 사용
+        response = supabase.table("inventory_logs") \
+            .select("""
+                logged_at,
+                item_name,
+                type,
+                quantity,
+                logistics_documents (
+                    vendor_name
+                )
+            """) \
+            .eq("company_id", company_id) \
+            .gte("logged_at", f"{start_date} 00:00:00") \
+            .lte("logged_at", f"{end_date} 23:59:59") \
+            .order("logged_at", desc=False) \
+            .execute()
+
+        # 2. 데이터 유무 확인
+        if not response.data:
+             # 데이터가 없을 경우 404 혹은 빈 엑셀을 내려줄 수 있음
+             raise HTTPException(status_code=404, detail="선택한 기간에 해당하는 데이터가 없습니다.")
+
+        # 3. 엑셀/CSV용 데이터 가공 (평면화)
+        processed_data = []
+        for row in response.data:
+            processed_data.append({
+                "날짜": row['logged_at'][:10] if row['logged_at'] else "-",
+                "품목명": row['item_name'],
+                "구분": "출고" if row['type'] == "OUT" else "입고",
+                "수량": row['quantity'],
+                "업체명": row.get('logistics_documents', {}).get('vendor_name', '-') if row.get('logistics_documents') else "-"
+            })
+        
+        # 4. Pandas DataFrame 변환
+        df = pd.DataFrame(processed_data)
+        
+        if format == "excel":
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name='Logistics_Report')
+            output.seek(0)
+            
+            headers = {'Content-Disposition': f'attachment; filename="logistics_{start_date}_{end_date}.xlsx"'}
+            return StreamingResponse(
+                output, 
+                headers=headers, 
+                media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+        
+        else: # CSV 처리
+            stream = io.StringIO()
+            df.to_csv(stream, index=False, encoding='utf-8-sig') # 엑셀 한글 깨짐 방지 위해 utf-8-sig 사용
+            return StreamingResponse(
+                iter([stream.getvalue()]),
+                media_type="text/csv",
+                headers={"Content-Disposition": f"attachment; filename=logistics_{start_date}_{end_date}.csv"}
+            )
+
+    except Exception as e:
+        print(f"Download Error: {str(e)}") # 서버 로그 확인용
+        raise HTTPException(status_code=500, detail=f"파일 생성 실패: {str(e)}")

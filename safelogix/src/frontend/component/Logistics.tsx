@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Boxes, Shield, CalendarDays, FileSpreadsheet, ScanLine, X, FileText, UploadCloud, Loader2, RefreshCw, Plus, Trash2 } from 'lucide-react'
+import { Boxes, Shield, FileSpreadsheet, ScanLine, X, FileText, UploadCloud, Loader2, RefreshCw, Plus, Trash2 } from 'lucide-react'
 import './logistics.css'
+import { Download } from 'lucide-react';
 
 type View = 'home' | 'cctv' | 'logistics'
 
@@ -25,6 +26,37 @@ function Logistics({ onNavigate }: LogisticsProps) {
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   const [savedItems, setSavedItems] = useState<any[]>([]);
+
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]); // 오늘 날짜 기본값
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (format: 'excel' | 'csv') => {
+    setIsDownloading(true);
+    try {
+      // 쿼리 파라미터 생성
+      const params = new URLSearchParams({
+        start_date: startDate,
+        end_date: endDate,
+        format: format,
+        company_id: localStorage.getItem('company_id') || ''
+      });
+
+      const url = `http://localhost:8000/download-logistics?${params.toString()}`;
+      
+      // a 태그를 이용한 다운로드 방식
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `logistics_report_${startDate}_to_${endDate}.${format === 'excel' ? 'xlsx' : 'csv'}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert("다운로드 중 오류가 발생했습니다.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const fetchLogistics = async () => {
     const companyId = localStorage.getItem('company_id');
@@ -254,11 +286,31 @@ function Logistics({ onNavigate }: LogisticsProps) {
         <header className="logistics-main-header">
           <h2>물류 및 재고 현황</h2>
           <div className="logistics-main-actions">
-            <button type="button" className="logistics-btn-date">
-              <CalendarDays size={18} />
-              <span>조회</span>
-            </button>
-
+            <div className="date-filter-group" style={{ display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: '#f1f5f9', padding: '5px 10px', borderRadius: '8px' }}></div>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{ border: 'none', background: 'transparent', fontSize: '13px' }}
+              />
+              <span style={{ color: '#64748b' }}>~</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{ border: 'none', background: 'transparent', fontSize: '13px' }}
+              />
+              <button
+                type="button"
+                className="logistics-btn-date"
+                onClick={() => handleDownload('excel')}
+                disabled={isDownloading}
+                style={{ marginLeft: '10px', padding: '5px 12px', height: '32px' }}
+              >
+                <Download size={16} />
+                <span>{isDownloading ? '생성중...' : '조회 및 다운로드'}</span>
+              </button>
+            
             <input 
               type="file" 
               accept=".csv, .xlsx, .xls" 
