@@ -97,11 +97,12 @@
 
 /* 우측 */
 .logistics-detail {
-    @apply bg-slate-50 flex flex-col;
+    /* 전체 높이를 부모에 맞추고, 밖으로 나가는 것을 숨김 */
+    @apply bg-slate-50 flex flex-col h-full overflow-hidden;
 }
 
 .logistics-detail-header {
-    @apply h-11 flex items-center justify-between pt-4 pr-4 pl-4 mb-4;
+    @apply h-11 flex items-center justify-between pt-4 pr-4 pl-4 mb-4 shrink-0;
 }
 
 .logistics-detail-header h3 {
@@ -113,11 +114,11 @@
 }
 
 .logistics-preview {
-    @apply bg-slate-200 py-4;
+    @apply bg-slate-200 py-4 shrink-0;
 }
 
 .original-preview {
-    @apply mx-4 h-95 rounded-md border border-dashed border-slate-300 bg-white text-slate-400 flex items-center justify-center;
+    @apply relative mx-4 h-95 rounded-md border border-dashed border-slate-300 bg-white flex items-center justify-center text-slate-400;
 }
 
 .preview-center {
@@ -128,20 +129,21 @@
     @apply absolute right-2 bottom-2 w-6 h-6 rounded-full border border-slate-300 bg-white text-slate-600 inline-flex items-center justify-center;
 }
 
-.original-preview {
-    @apply relative mx-4 h-95 rounded-md border border-dashed border-slate-300 bg-white;
-}
+/* --- 여기서부터 하단 레이아웃 고정 핵심 CSS --- */
 
 .form-container {
-    @apply bg-white h-full;
+    /* 남은 공간을 꽉 채우고(flex-1), 자식 요소 스크롤을 허용(min-h-0) */
+    @apply bg-white flex-1 flex flex-col min-h-0;
 }
 
 .logistics-ocr-msg {
-    @apply mx-8 mt-4 text-sm text-blue-600 bg-blue-50 rounded-md px-4 py-3;
+    /* 텍스트가 줄어들지 않도록(shrink-0) 고정 */
+    @apply mx-8 mt-4 text-sm text-blue-600 bg-blue-50 rounded-md px-4 py-3 shrink-0;
 }
 
 .logistics-form {
-    @apply mx-8 mt-4;
+    /* 폼 영역만 스크롤 되도록 설정 (flex-1, overflow-y-auto) */
+    @apply mx-8 mt-4 flex-1 overflow-y-auto pr-2 pb-6;
 }
 
 .logistics-form > label {
@@ -173,13 +175,14 @@
 }
 
 .logistics-detail-actions {
-    @apply mt-30 px-8 flex justify-end gap-2;
+    /* 기존 mt-30을 제거하고, 상단 테두리를 준 뒤 영역이 찌그러지지 않게(shrink-0) 바닥에 고정 */
+    @apply p-4 px-8 border-t border-slate-200 bg-white flex justify-end gap-2 shrink-0;
 }
 
 .logistics-btn-cancel {
-    @apply h-11 px-5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors;
+    @apply h-11 px-5 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer;
 }
 
 .logistics-btn-save {
-    @apply h-11 px-5 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors;
+    @apply h-11 px-5 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors cursor-pointer;
 }

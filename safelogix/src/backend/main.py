@@ -4,6 +4,7 @@ import base64
 import json
 import io
 import pandas as pd
+import uuid
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -59,6 +60,7 @@ class LogisticsSaveRequest(BaseModel):
     itemName: str    # 품목명 (inventory_logs의 item_name)
     quantity: int    # 수량 (inventory_logs의 quantity)
     type: str = "IN" # 구분 (ERD의 inventory_logs.type 컬럼용: 기본값 '입고')
+
 # ---------------------------------------------------------
 # 4. 유틸리티 함수: 이미지 Base64 인코딩
 # ---------------------------------------------------------
@@ -86,14 +88,18 @@ def login_with_code(req: LoginRequest):
             "email": virtual_email,
             "password": virtual_password
         })
+        current_user_id = auth_response.user.id
+        user_db_info = supabase.table("users").select("company_id").eq("id", current_user_id).execute()
+        real_company_id = user_db_info.data[0]["company_id"] if user_db_info.data else None
         return {
             "message": "로그인 성공!",
             "access_token": auth_response.session.access_token,
-            "user_id": auth_response.user.id
+            "user_id": auth_response.user.id,
+            "company_id": real_company_id
         }
     except Exception as e:
         raise HTTPException(status_code=401, detail="유효하지 않은 접속 코드입니다.")
-
+        
 # [기능 2] 관리자용 접속 코드 발급 API
 @app.post("/admin/generate-code")
 def generate_access_code(req: CreateCodeRequest):
@@ -178,91 +184,191 @@ async def connect_camera(req: CameraConnectRequest):
         "stream_url": "0"  # 프론트엔드에서 '0'이면 navigator.mediaDevices 호출
     }
 
-# 💡 [기능 6] 문서 업로드 및 파싱
-@app.post("/upload-excel")
-async def upload_excel(file: UploadFile = File(...)):
+# [기능 5] 문서 사진 AI 스캔 및 추출 (다중 품목 + 구분 추가)
+@app.post("/scan-document")
+async def scan_document(file: UploadFile = File(...)):
     try:
-        contents = await file.read()
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(io.BytesIO(contents))
-        else:
-            df = pd.read_excel(io.BytesIO(contents))
+        encoded_image = await encode_image(file)
+        response = await openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    # 💡 변경: 'type' 키를 추가하고 입고/출고 값을 추출하라고 지시
+                    "content": "You are an expert at extracting information from logistics documents. Extract ALL items from the document. Output strictly as a JSON object containing an 'items' array. Each object in the array must have keys: 'company_name', 'item_name', 'quantity', and 'type'. For 'type', determine if it is receiving (입고) or issuing (출고)."
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        # 💡 변경: 유저 프롬프트에도 구분(입고/출고)을 명시
+                        {"type": "text", "text": "이 이미지에서 업체명, 품목명, 수량, 구분(입고 또는 출고)을 모두 찾아서 배열 형태로 추출해줘. 수량은 숫자만."},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_image}"}}
+                    ],
+                }
+            ],
+            response_format={ "type": "json_object" }
+        )
         
-        if df.empty:
-            raise HTTPException(status_code=400, detail="파일이 비어있습니다.")
-
-        first_row = df.iloc[0].fillna("").to_dict()
+        result_json = json.loads(response.choices[0].message.content)
+        items = result_json.get("items", [])
         
-        # 컬럼명 후보군 처리
-        company_name = first_row.get("업체명", first_row.get("Company", ""))
-        item_name = first_row.get("품목명", first_row.get("Item", ""))
-        quantity = first_row.get("수량", first_row.get("Qty", 0))
-
-        return {
-            "company_name": str(company_name).strip(),
-            "item_name": str(item_name).strip(),
-            "quantity": str(quantity).strip()
-        }
+        formatted_items = []
+        for item in items:
+            formatted_items.append({
+                "company_name": item.get("company_name", ""),
+                "item_name": item.get("item_name", ""),
+                "quantity": str(item.get("quantity", "0")),
+                "type": item.get("type", "입고") # 💡 구분 값 추출 (없으면 기본값 '입고')
+            })
+            
+        return {"items": formatted_items}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"엑셀 파싱 실패: {str(e)}")
-    
-    # 💡 [기능 6] 문서 파일 업로드 및 파싱 (Pandas 적용)
+        print(f"OCR Error: {e}")
+        raise HTTPException(status_code=500, detail=f"AI 인식 오류: {str(e)}")
+
+# [기능 6] 문서 파일 업로드 및 파싱 (다중 품목 + 구분 추가)
 @app.post("/upload-excel")
 async def upload_excel(file: UploadFile = File(...)):
     try:
         contents = await file.read()
-        
-        # 파일 확장자에 따라 pandas 읽기 처리
         if file.filename.endswith('.csv'):
             df = pd.read_csv(io.BytesIO(contents))
         elif file.filename.endswith(('.xlsx', '.xls')):
             df = pd.read_excel(io.BytesIO(contents))
         else:
-            raise HTTPException(status_code=400, detail="지원하지 않는 파일 형식입니다. .xlsx, .xls, .csv 파일만 가능합니다.")
+            raise HTTPException(status_code=400, detail="지원하지 않는 파일 형식입니다.")
         
         if df.empty:
-            raise HTTPException(status_code=400, detail="업로드된 파일이 비어 있습니다.")
+            raise HTTPException(status_code=400, detail="파일이 비어있습니다.")
 
-        # 첫 번째 로우 데이터를 읽어 키 매핑 시도 (결측치는 빈값 처리)
-        first_row = df.iloc[0].fillna("").to_dict()
-        
-        # 문서 구조의 유연성을 위해 다양한 컬럼명 후보군 탐색
-        company_name = first_row.get("업체명", first_row.get("Company", first_row.get("상호", "")))
-        item_name = first_row.get("품목명", first_row.get("Item", first_row.get("품명", "")))
-        quantity = first_row.get("수량", first_row.get("Qty", first_row.get("수량(EA)", 0)))
+        # 1. 엑셀 데이터를 AI가 읽기 좋은 텍스트(JSON/Dict)로 변환
+        raw_data = df.fillna("").to_dict(orient="records")
 
-        return {
-            "company_name": str(company_name).strip(),
-            "item_name": str(item_name).strip(),
-            "quantity": str(quantity).strip()
-        }
+        # 2. AI에게 데이터 매핑 요청
+        # 데이터가 너무 많을 경우를 대비해 상위 일정량만 보내거나 조절 가능합니다.
+        response = await openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+                    당신은 물류 데이터 전문가입니다. 
+                    제공된 원본 데이터(List of Dict)를 분석하여 우리 시스템 규격에 맞게 변환하세요.
+                    
+                    변환 규칙:
+                    1. 결과는 반드시 'items'라는 키를 가진 JSON 객체여야 합니다.
+                    2. 각 항목은 다음 키를 가져야 합니다:
+                       - 'company_name': 업체명, 상호, 공급처 등과 관련된 값
+                       - 'item_name': 품목, 상품명, 모델명 등과 관련된 값
+                       - 'quantity': 수량, 개수 등 (숫자만 남길 것)
+                       - 'type': '입고' 또는 '출고' (데이터에 명시되지 않았다면 문맥상 판단하거나 기본값 '입고')
+                    3. 원본 데이터의 컬럼명이 무엇이든 문맥을 파악해서 위 키값으로 매핑하세요.
+                    """
+                },
+                {
+                    "role": "user",
+                    "content": f"이 데이터를 규격에 맞춰 변환해줘: {json.dumps(raw_data, ensure_ascii=False)}"
+                }
+            ],
+            response_format={ "type": "json_object" }
+        )
+
+        # 3. AI 응답 파싱
+        result_json = json.loads(response.choices[0].message.content)
+        parsed_items = result_json.get("items", [])
+
+        # 4. 최종 데이터 보정 (안전장치)
+        formatted_items = []
+        for item in parsed_items:
+            formatted_items.append({
+                "company_name": str(item.get("company_name", "")),
+                "item_name": str(item.get("item_name", "")),
+                "quantity": str(item.get("quantity", "0")),
+                "type": item.get("type", "입고")
+            })
+
+        return {"items": formatted_items}
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"문서 파싱 실패: {str(e)}")
+        print(f"AI Excel Parsing Error: {e}")
+        raise HTTPException(status_code=500, detail=f"AI 문서 해석 실패: {str(e)}")
+
+# [기능 7] 최종 검수 데이터 저장 (구분 값 동적 저장)
+@app.post("/save-logistics")
+async def save_logistics(
+    company_id: str = Form(...),
+    vendorName: str = Form(...),
+    itemName: str = Form(...),
+    type: str = Form(...),
+    quantity: int = Form(...),
+    file: UploadFile = File(None)
+):
+    try:
+        image_url = None
+
+        if file:
+            file_extension = file.filename.split(".")[-1] if "." in file.filename else "png"
+            unique_filename = f"{uuid.uuid4()}.{file_extension}"
+            file_bytes = await file.read()
+            supabase.storage.from_("documents").upload(
+                path=unique_filename,
+                file=file_bytes,
+                file_options={"content-type": file.content_type}
+            )
+            image_url = supabase.storage.from_("documents").get_public_url(unique_filename)
+
+        doc_res = supabase.table("logistics_documents").insert({
+            "company_id": company_id,
+            "vendor_name": vendorName,
+            "document_date": "now()",
+            "raw_image_url": image_url
+        }).execute()
+        
+        if not doc_res.data:
+            raise Exception("Document insert failed")
+        
+        new_doc_id = doc_res.data[0]['id']
+
+        log_res = supabase.table("inventory_logs").insert({
+            "company_id": company_id,
+            "document_id": new_doc_id,
+            "item_name": itemName,
+            "type": type,
+            "quantity": quantity, 
+            "unit": "EA"
+        }).execute()
+
+        return {"status": "success", "image_url": image_url}
     
-    # 💡 [기능 7] 최종 검수 데이터 Supabase 테이블에 저장
+    except Exception as e:
+        print(f"Error detail: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"DB 저장 오류: {str(e)}")
 
-    @app.post("/save-logistics")
-    async def save_logistics(item: LogisticsSaveRequest):
-        try:
-            # 1. logistics_documents 테이블에 먼저 업체(Vendor) 기록
-            doc_res = supabase.table("logistics_documents").insert({
-                "company_id": item.company_id,
-                "vendor_name": item.companyName,
-                "document_date": "now()"
-            }).execute()
-            
-            new_doc_id = doc_res.data[0]['id']
+# [기능 8] 회사 데이터 가져오기 (수정본)
+@app.get("/logistics-list")
+def get_logistics_list(company_id: str):
+    try:
+        # 1. inventory_logs 테이블에서 필요한 컬럼들을 선택
+        # 2. .select("..., logistics_documents(vendor_name)") 문법으로 조인 수행
+        # 3. 정렬 기준을 실제 DB 컬럼인 'logged_at'으로 변경
+        response = supabase.table("inventory_logs") \
+            .select("""
+                id,
+                logged_at,
+                item_name,
+                type,
+                quantity,
+                logistics_documents (
+                    vendor_name
+                )
+            """) \
+            .eq("company_id", company_id) \
+            .order("logged_at", desc=True) \
+            .execute()
+        
+        return {"items": response.data}
 
-            # 2. inventory_logs 테이블에 품목 상세 기록 (외래키 연결)
-            log_res = supabase.table("inventory_logs").insert({
-                "company_id": item.company_id,
-                "document_id": new_doc_id,
-                "item_name": item.itemName,
-                "quantity": item.quantity,
-                "type": "IN", # 입고로 고정
-                "unit": "EA"
-            }).execute()
-
-            return {"status": "success", "data": log_res.data}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"DB 저장 오류: {str(e)}")
+    except Exception as e:
+        # 구체적인 에러 확인을 위해 서버 터미널에 에러 로그 출력
+        print(f"불러오기 에러 상세: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"데이터 불러오기 실패: {str(e)}")

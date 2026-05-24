@@ -51,6 +51,7 @@ function App() {
           const data = await response.json()
           // 발급받은 출입증(토큰)을 브라우저 로컬 저장소에 안전하게 보관합니다.
           localStorage.setItem('access_token', data.access_token)
+          localStorage.setItem('company_id', data.company_id);
           setIsAuthenticated(true) // 로그인 상태로 변경
       } else {
           alert('유효하지 않은 접속 코드입니다.')
