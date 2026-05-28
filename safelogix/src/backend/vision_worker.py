@@ -1,77 +1,107 @@
 import cv2
 import os
 import time
-import uuid  # 중복 방지를 위한 uuid 추가
 from datetime import datetime
 from dotenv import load_dotenv
-from ultralytics import YOLO
+from roboflow import Roboflow
 from supabase import create_client
 
-# .env 로드
+
+# 1. 초기 설정 로드
 load_dotenv()
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
-model = YOLO("yolov10n.pt") 
+# 2. Roboflow 접속 (inference_client 사용)
+rf = Roboflow(api_key="NBXpOGSyxX17hapZXcfX")
+client = InferenceHTTPClient(
+    api_url="https://serverless.roboflow.com",
+    api_key="NBXpOGSyxX17hapZXcfX"
+)
 
 def process_camera(camera_id, company_id, source_url):
     cap = cv2.VideoCapture(int(source_url) if source_url == '0' else source_url)
     if not os.path.exists('temp'): os.makedirs('temp')
 
-    print(f"📸 분석 시작...")
+    print(f"👷 통합 안전 감지 시스템 가동 중...")
+    print(f"⏱️ 감지 시 20초간 대기(Cooldown) 모드가 활성화되었습니다.")
 
     while cap.isOpened():
         success, frame = cap.read()
         if not success: break
 
-        results = model(frame, conf=0.5, verbose=False)
-        
-        if len(results[0].boxes) > 0:
-            # 💡 해결 1: 파일명 중복 방지 (밀리초 + 랜덤 문자열 추가)
-            ms_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-            unique_id = str(uuid.uuid4())[:8] # 짧은 랜덤 키
-            filename = f"safety_{camera_id}_{ms_timestamp}_{unique_id}.jpg"
-            local_path = f"temp/{filename}"
+        # 분석용 임시 파일
+        temp_img = "temp/current_frame.jpg"
+        cv2.imwrite(temp_img, frame)
+
+        try:
+            # 3. AI 워크플로우 실행
+            result = client.run_workflow(
+                workspace_name="-itwia",
+                workflow_id="general-segmentation-api-2",
+                images={"image": temp_img},
+                parameters={
+                    "classes": "helmet, no_helmet, suit, no_suit, glove, no_glove"
+                }
+            )
+
+            # 결과 노드에서 데이터 추출
+            output_data = result[0] if isinstance(result, list) else result
+            predictions = output_data.get('output_nodes_data', {}).get('predictions', [])
             
-            cv2.imwrite(local_path, frame)
+            violations = []
             
-            try:
-                # 1. Supabase Storage 업로드
-                with open(local_path, 'rb') as f:
+            # 위반 사항 체크
+            for pred in predictions:
+                label = pred.get('class')
+                conf = pred.get('confidence', 0)
+                
+                if conf > 0.3:
+                    if label == 'no_helmet':
+                        violations.append("안전모 미착용")
+                    elif label == 'no_suit':
+                        violations.append("안전조끼 미착용")
+                    elif label == 'no_glove':
+                        violations.append("안전장갑 미착용")
+
+            # 4. 위반 감지 시 처리 로직
+            if violations:
+                violation_str = ", ".join(list(set(violations)))
+                print(f"⚠️ {datetime.now().strftime('%H:%M:%S')} - 위반 감지: {violation_str}")
+                
+                # [스냅샷 저장]
+                filename = f"violation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+                save_path = f"temp/{filename}"
+                cv2.imwrite(save_path, frame)
+
+                # [Supabase 업로드]
+                with open(save_path, 'rb') as f:
                     supabase.storage.from_("snapshots").upload(filename, f)
                 
                 snapshot_url = supabase.storage.from_("snapshots").get_public_url(filename)
 
-                # 💡 해결 2: ID 데이터 타입 맞추기
-                # 만약 DB 컬럼이 bigint라면 int()로 감싸야 하고, 
-                # UUID(문자열) 타입이라면 그대로 두어야 합니다.
-                # 아래 예시는 에러 메시지에 맞춰 숫자로 변환을 시도하거나 실제 값을 넣는 부분입니다.
-                
-                insert_data = {
-                    "company_id": company_id,  # 만약 에러가 계속 나면 DB에서 컬럼 타입을 확인하세요!
+                # [DB 로그 기록]
+                supabase.table("safety_logs").insert({
+                    "company_id": company_id,
                     "camera_id": camera_id,
-                    "violation_type": "안전 미준수",
+                    "violation_type": violation_str,
                     "snapshot_url": snapshot_url,
-                    "status": "pending",
                     "detected_at": datetime.now().isoformat()
-                }
-
-                supabase.table("safety_logs").insert(insert_data).execute()
-                print(f"🚀 저장 성공: {snapshot_url}")
+                }).execute()
                 
-                os.remove(local_path)
-                time.sleep(5) # 쿨타임
+                print(f"✅ 로그 저장 완료. 20초간 감지를 중단합니다...")
+                
+                # 🔥 [중요] 사진 폭탄 방지: 20초간 대기
+                time.sleep(20) 
+                print(f"🔄 감지를 재개합니다.")
 
-            except Exception as e:
-                print(f"❌ 전송 에러: {e}")
+        except Exception as e:
+            print(f"❌ 분석 오류: {e}")
+        
+        # 평상시에는 1초에 한 번만 분석 (리소스 절약)
+        time.sleep(1)
 
     cap.release()
 
 if __name__ == "__main__":
-    # ERD를 보니 camera_id가 int8(숫자)입니다.
-    # 1. Supabase 'cameras' 테이블에 가서 id 숫자를 확인하세요. (예: 1)
-    # 2. 'companies' 테이블의 id는 uuid 타입이 맞습니다.
-    
-    MY_CAMERA_ID = 1  # 실제 cameras 테이블의 id 숫자 입력
-    MY_COMPANY_ID = "e45e0edd-3df3-4978-984d-63ff53302981" # 실제 company uuid 입력
-    
-    process_camera(MY_CAMERA_ID, MY_COMPANY_ID, "0")
+    # 본인의 실제 ID로 테스트하세요
+    process_camera(1, "e45e0edd-3df3-4978-984d-63ff53302981", "0")

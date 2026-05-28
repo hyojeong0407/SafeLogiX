@@ -58,7 +58,7 @@ function CameraConnect({
         }
 
         // 부모 컴포넌트로 전달 (스마트폰이면 이름 앞에 [폰] 추가 및 위치 정보와 결합 가능)
-        // 실제 운영 시에는 onAddCamera 인터페이스에 ipAddress 필드를 추가하는 것이 좋습니다.
+        
         onAddCamera({ 
             name: cameraType === 'smartphone' ? `[폰] ${name.trim()}` : name.trim(),
             location: cameraType === 'smartphone' ? `${location.trim()} (${ipAddress.trim()})` : location.trim()
