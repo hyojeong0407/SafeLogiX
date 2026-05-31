@@ -184,18 +184,7 @@ function Cctv({ onNavigate }: CctvProps) {
         </header>
 
         <section className="cctv-table-area">
-          <div 
-            className="cctv-table-head"
-            style={{ 
-              display: 'grid', 
-              gridTemplateColumns: '0.5fr 1fr 2fr 1fr 1fr 1.5fr', // 컬럼 너비 비율 (No는 좁게, 품목명은 넓게)
-              textAlign: 'center', 
-              fontWeight: 'bold',
-              padding: '15px',
-              backgroundColor: '#f8fafc',
-              borderBottom: '2px solid #e2e8f0'
-            }}
-            >
+          <div className="cctv-table-head">
             <span>No</span>
             <span>감지 시간</span>
             <span>카메라 위치</span>
