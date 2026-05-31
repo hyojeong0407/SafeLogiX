@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Boxes, Shield, FileSpreadsheet, ScanLine, X, FileText, UploadCloud, Loader2, RefreshCw, Plus, Trash2 } from 'lucide-react'
+import { Boxes, Shield, FileSpreadsheet, ScanLine, X, FileText, UploadCloud, Loader2, RefreshCw, Plus, Trash2, ArrowLeft } from 'lucide-react'
 import './logistics.css'
 import { Download } from 'lucide-react';
 
@@ -285,8 +285,18 @@ function Logistics({ onNavigate }: LogisticsProps) {
       <main className="logistics-main">
         <header className="logistics-main-header">
           <h2>물류 및 재고 현황</h2>
+
+          <button
+            type="button"
+            className="logistics-back-btn"
+            onClick={() => onNavigate('home')}
+          >
+            <ArrowLeft size={16} />
+            <span>돌아가기</span>
+          </button>
+          
           <div className="logistics-main-actions">
-            <div className="date-filter-group" style={{ display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: '#f1f5f9', padding: '5px 10px', borderRadius: '8px' }}></div>
+            <div className="date-filter-group">
               <input
                 type="date"
                 value={startDate}
@@ -300,16 +310,16 @@ function Logistics({ onNavigate }: LogisticsProps) {
                 onChange={(e) => setEndDate(e.target.value)}
                 style={{ border: 'none', background: 'transparent', fontSize: '13px' }}
               />
-              <button
-                type="button"
-                className="logistics-btn-date"
-                onClick={() => handleDownload('excel')}
-                disabled={isDownloading}
-                style={{ marginLeft: '10px', padding: '5px 12px', height: '32px' }}
-              >
-                <Download size={16} />
-                <span>{isDownloading ? '생성중...' : '조회 및 다운로드'}</span>
-              </button>
+            </div>
+            <button
+              type="button"
+              className="logistics-btn-date"
+              onClick={() => handleDownload('excel')}
+              disabled={isDownloading}
+            >
+              <Download size={18} />
+              <span>{isDownloading ? '생성중...' : '조회 및 다운로드'}</span>
+            </button>
             
             <input 
               type="file" 

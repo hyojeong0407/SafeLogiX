@@ -55,15 +55,23 @@
 }
 
 .cctv-main-header {
-    @apply bg-white h-14 flex items-center justify-between pt-6 pl-6 pr-6 mb-6;
+    @apply bg-white h-14 flex items-center justify-between pt-6 pl-6 pr-6 mb-6 whitespace-nowrap;
 }
 
 .cctv-main-header h2 {
     @apply text-[28px] font-bold text-slate-900 leading-tight;
 }
 
+.cctv-back-btn {
+    @apply ml-20 inline-flex items-center gap-2 h-9 px-3 rounded-md cursor-pointer border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors;
+}
+
 .cctv-main-actions {
     @apply flex gap-2;
+}
+
+.search-bar {
+    @apply flex items-center border border-slate-300 rounded-md px-4;
 }
 
 .btn-filter {

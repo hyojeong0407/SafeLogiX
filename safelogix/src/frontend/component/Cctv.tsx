@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Boxes, ShieldAlert, Funnel, Download, X, Search } from 'lucide-react'
+import { Boxes, ShieldAlert, Funnel, Download, X, Search, ArrowLeft } from 'lucide-react'
 import './Cctv.css'
 
 type View = 'home' | 'cctv' | 'logistics'
@@ -147,10 +147,19 @@ function Cctv({ onNavigate }: CctvProps) {
         <header className="cctv-main-header">
           <h2>AI 위험 감지 로그</h2>
           
+          <button
+            type="button"
+            className="cctv-back-btn"
+            onClick={() => onNavigate('home')}
+          >
+            <ArrowLeft size={16} />
+            <span>돌아가기</span>
+          </button>
+
           <div className="cctv-main-actions">
             {/* 검색창 영역 */}
-            <div className="search-bar" style={{ display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: '4px', padding: '0 10px', background: '#fff', marginRight: '10px' }}>
-              <Search size={16} color="#888" />
+            <div className="search-bar">
+              <Search size={18} color="#888" />
               <input 
                 type="text" 
                 placeholder="NO 검색 (숫자)" 

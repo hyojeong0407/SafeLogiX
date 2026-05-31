@@ -64,8 +64,16 @@
     @apply text-[28px] font-bold text-slate-900 leading-tight;
 }
 
+.logistics-back-btn {
+    @apply ml-20 inline-flex items-center gap-2 h-9 px-3 rounded-md cursor-pointer border border-slate-300 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors;
+}
+
 .logistics-main-actions {
     @apply flex gap-2;
+}
+
+.date-filter-group {
+    @apply flex items-center gap-2 bg-slate-400 rounded-md px-3; 
 }
 
 .logistics-btn-date {
