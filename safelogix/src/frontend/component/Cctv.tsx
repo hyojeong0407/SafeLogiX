@@ -184,7 +184,18 @@ function Cctv({ onNavigate }: CctvProps) {
         </header>
 
         <section className="cctv-table-area">
-          <div className="cctv-table-head">
+          <div 
+            className="cctv-table-head"
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '0.5fr 1fr 2fr 1fr 1fr 1.5fr', // 컬럼 너비 비율 (No는 좁게, 품목명은 넓게)
+              textAlign: 'center', 
+              fontWeight: 'bold',
+              padding: '15px',
+              backgroundColor: '#f8fafc',
+              borderBottom: '2px solid #e2e8f0'
+            }}
+            >
             <span>No</span>
             <span>감지 시간</span>
             <span>카메라 위치</span>
@@ -198,7 +209,6 @@ function Cctv({ onNavigate }: CctvProps) {
                 key={log.id} 
                 className="cctv-table-row" 
                 onClick={() => handleRowClick(log)}
-                style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textAlign: 'center' }}
               >
                 <span>{log.id}</span>
                 <span>{formatDate(log.detected_at)}</span>
