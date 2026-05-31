@@ -20,7 +20,7 @@ function App() {
   // 휴대폰 카메라 연결 관련 상태
   const [cameras, setCameras] = useState<CameraItem[]>([
   {
-    id: 'test-cam-1',
+    id: '1',
     name: '테스트 웹캠',
     location: '사무실 (내 PC)',
     status: 'offline'
@@ -86,7 +86,9 @@ function App() {
   const handleConnect = async () => {
     if (!selectedCameraId) return;
 
-    const selectedCamera = cameras.find((cameraItem) => cameraItem.id === selectedCameraId);
+    const selectedCamera = cameras.find(c => c.id === selectedCameraId);
+    const companyId = localStorage.getItem('company_id');
+
     if (!selectedCamera) return;
 
     try {
@@ -97,6 +99,7 @@ function App() {
           camera_id: selectedCamera.id,
           name: selectedCamera.name,
           location: selectedCamera.location,
+          company_id: companyId,
         }),
       });
 
