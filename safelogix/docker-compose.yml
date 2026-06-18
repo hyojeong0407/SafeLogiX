@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # 🐍 백엔드 서비스 설정
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend      # 🌟 Dockerfile의 'AS backend' 구역을 빌드합니다.
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src/backend:/app
+    env_file:
+      - .env
+
+  # ⚛️ 프런트엔드 서비스 설정
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend     # 🌟 Dockerfile의 'AS frontend' 구역을 빌드합니다.
+    ports:
+      - "5176:5176"
+    volumes:
+      - ./src/frontend:/app
+      - /app/node_modules  # 🌟 호스트 폴더로 node_modules가 쏟아지는 것 방어
+    env_file:
+      - .env
