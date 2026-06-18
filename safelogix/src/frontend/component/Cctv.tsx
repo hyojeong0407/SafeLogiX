@@ -35,7 +35,7 @@ function Cctv({ onNavigate }: CctvProps) {
   const fetchLogs = async () => {
     try {
       const companyId = localStorage.getItem('company_id') || 'YOUR_COMPANY_ID'; 
-      const response = await fetch(`http://localhost:8000/api/safety-logs?company_id=${companyId}`);
+      const response = await fetch(`http://49.172.228.79:8000/api/safety-logs?company_id=${companyId}`);
       
       if (!response.ok) throw new Error('데이터를 불러오지 못했습니다.');
       
@@ -70,7 +70,7 @@ function Cctv({ onNavigate }: CctvProps) {
     if (!selectedLog) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/safety-logs/${selectedLog.id}`, {
+      const response = await fetch(`http://49.172.228.79:8000/api/safety-logs/${selectedLog.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ function Cctv({ onNavigate }: CctvProps) {
       // 파일 다운로드 시작을 사용자에게 알림
       alert('AI가 현장 데이터를 분석하여 보고서를 작성 중입니다. 잠시만 기다려주세요.');
 
-      const response = await fetch(`http://localhost:8000/api/download-safety-report?company_id=${companyId}`);
+      const response = await fetch(`http://49.172.228.79:8000/api/download-safety-report?company_id=${companyId}`);
 
       if (!response.ok) throw new Error('보고서 다운로드에 실패했습니다.');
 

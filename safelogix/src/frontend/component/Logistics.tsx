@@ -42,7 +42,7 @@ function Logistics({ onNavigate }: LogisticsProps) {
         company_id: localStorage.getItem('company_id') || ''
       });
 
-      const url = `http://localhost:8000/download-logistics?${params.toString()}`;
+      const url = `http://49.172.228.79:8000/download-logistics?${params.toString()}`;
       
       // a 태그를 이용한 다운로드 방식
       const link = document.createElement('a');
@@ -63,7 +63,7 @@ function Logistics({ onNavigate }: LogisticsProps) {
     if (!companyId) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/logistics-list?company_id=${companyId}`);
+      const response = await fetch(`http://49.172.228.79:8000/logistics-list?company_id=${companyId}`);
       if (response.ok) {
         const data = await response.json();
         setSavedItems(data.items);
@@ -91,7 +91,7 @@ function Logistics({ onNavigate }: LogisticsProps) {
     uploadData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/upload-excel', { 
+      const response = await fetch('http://49.172.228.79:8000/upload-excel', { 
         method: 'POST', 
         body: uploadData 
       });
@@ -130,7 +130,7 @@ function Logistics({ onNavigate }: LogisticsProps) {
     uploadData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/scan-document', { 
+      const response = await fetch('http://49.172.228.79:8000/scan-document', { 
         method: 'POST', 
         body: uploadData 
       });
@@ -174,7 +174,7 @@ function Logistics({ onNavigate }: LogisticsProps) {
 
     try {
       const endpoint = uploadType === 'excel' ? '/upload-excel' : '/scan-document';
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const response = await fetch(`http://49.172.228.79:8000${endpoint}`, {
         method: 'POST',
         body: uploadData
       });
@@ -219,7 +219,7 @@ function Logistics({ onNavigate }: LogisticsProps) {
         formData.append('file', currentFile);
       }
 
-      const response = await fetch('http://localhost:8000/save-logistics', {
+      const response = await fetch('http://49.172.228.79:8000/save-logistics', {
         method: 'POST',
         body: formData, // FormData 사용 시 헤더 설정 불필요
       });
