@@ -9,7 +9,7 @@ SafeLogiX 실행 방법
    - 프로젝트 루트에 .env.example 파일을 복사해서 .env 로 이름 변경
    - 값 채워넣기 (따로 전달 예정)
 
-3. 프로젝트 루트(safelogix/)에서 터미널 열고 아래 명령어 실행
+3. 프로젝트 루트(safelogix/)에서 터미널 열고 cd src/frontend 친 후 아래 명령어 실행
 
    처음 실행할 때
    > docker compose up --build
@@ -23,8 +23,8 @@ SafeLogiX 실행 방법
    > docker compose down
 
 ---
-그리고 frontend 파일에 node_modules이 생길건데
+frontend 파일에 docker compose up --build 한 후에 node_modules이 생길건데
 cd src/frontend
 npm install
 
-한 후에 docker compose up --build 이거 할 것!!
+한 후에 docker compose up 이거 할 것!!
